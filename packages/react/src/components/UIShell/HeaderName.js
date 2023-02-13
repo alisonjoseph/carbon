@@ -5,21 +5,20 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-import { settings } from 'carbon-components';
 import cx from 'classnames';
 import React from 'react';
 import PropTypes from 'prop-types';
 import Link, { LinkPropTypes } from './Link';
+import { usePrefix } from '../../internal/usePrefix';
 
-const { prefix: selectorPrefix } = settings;
-
-const HeaderName = ({
+function HeaderName({
   children,
   className: customClassName,
   prefix,
   href,
   ...rest
-}) => {
+}) {
+  const selectorPrefix = usePrefix();
   const className = cx(`${selectorPrefix}--header__name`, customClassName);
   return (
     <Link {...rest} className={className} href={href}>
@@ -34,7 +33,7 @@ const HeaderName = ({
       {children}
     </Link>
   );
-};
+}
 
 HeaderName.propTypes = {
   /**
@@ -50,7 +49,7 @@ HeaderName.propTypes = {
   children: PropTypes.node.isRequired,
 
   /**
-   * Optionally provide a custom class to apply to the underlying <li> node
+   * Optionally provide a custom class to apply to the underlying `<li>` node
    */
   className: PropTypes.string,
 

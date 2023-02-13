@@ -5,10 +5,17 @@
  * LICENSE file in the root directory of this source tree.
  */
 
+import { deprecateFieldOnObject } from '../../internal/deprecateFieldOnObject';
+
 import MultiSelect from './MultiSelect';
-import FilterableMultiSelect from './FilterableMultiSelect';
+import { default as FilterableMultiSelect } from './FilterableMultiSelect';
 
 FilterableMultiSelect.displayName = 'MultiSelect.Filterable';
 MultiSelect.Filterable = FilterableMultiSelect;
 
+if (__DEV__) {
+  deprecateFieldOnObject(MultiSelect, 'Filterable', FilterableMultiSelect);
+}
+
+export { FilterableMultiSelect, MultiSelect };
 export default MultiSelect;

@@ -18,6 +18,11 @@ describe('Metadata', () => {
   beforeEach(() => {
     jest.mock('fs', () => {
       const memfs = require('memfs');
+      // Note: it seems that memfs does not support this and it is something
+      // that fs-extra requires in order to operate. In the interim, we will
+      // point the native realpath to the default realpath to get around this
+      // issue.
+      memfs.fs.realpath.native = memfs.fs.realpath;
       vol = memfs.vol;
       return memfs.fs;
     });
@@ -74,7 +79,7 @@ describe('Metadata', () => {
       // data
       expect(mockSchema).toHaveBeenCalledTimes(1);
 
-      // If ane xtension provides a validate method, it should be called with
+      // If an extension provides a validate method, it should be called with
       // the registry and data for the extension
       expect(mockExtension.validate).toHaveBeenCalledTimes(1);
       expect(mockExtension.validate).toHaveBeenCalledWith(

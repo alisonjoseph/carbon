@@ -5,15 +5,14 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-import { settings } from 'carbon-components';
 import cx from 'classnames';
 import PropTypes from 'prop-types';
 import React, { useRef } from 'react';
-import { Filename } from './';
+import Filename from './Filename';
 import { keys, matches } from '../../internal/keyboard';
 import uid from '../../tools/uniqueId';
-
-const { prefix } = settings;
+import { usePrefix } from '../../internal/usePrefix';
+import * as FeatureFlags from '@carbon/feature-flags';
 
 function FileUploaderItem({
   uuid,
@@ -27,18 +26,22 @@ function FileUploaderItem({
   size,
   ...other
 }) {
+  const prefix = usePrefix();
   const { current: id } = useRef(uuid || uid());
   const classes = cx(`${prefix}--file__selected-file`, {
     [`${prefix}--file__selected-file--invalid`]: invalid,
-    [`${prefix}--file__selected-file--field`]: size === 'field',
-    [`${prefix}--file__selected-file--sm`]: size === 'small',
+    [`${prefix}--file__selected-file--md`]: size === 'field' || size === 'md',
+    [`${prefix}--file__selected-file--sm`]: size === 'small' || size === 'sm',
   });
   return (
     <span className={classes} {...other}>
-      <p className={`${prefix}--file-filename`}>{name}</p>
+      <p className={`${prefix}--file-filename`} title={name} id={name}>
+        {name}
+      </p>
       <span className={`${prefix}--file__state-container`}>
         <Filename
           iconDescription={iconDescription}
+          aria-describedby={name}
           status={status}
           invalid={invalid}
           onKeyDown={(evt) => {
@@ -104,10 +107,12 @@ FileUploaderItem.propTypes = {
   onDelete: PropTypes.func,
 
   /**
-   * Specify the size of the uploaded items, from a list of available
-   * sizes. For `default` size, this prop can remain unspecified.
+   * Specify the size of the FileUploaderButton, from a list of available
+   * sizes.
    */
-  size: PropTypes.oneOf(['default', 'field', 'small']),
+  size: FeatureFlags.enabled('enable-v11-release')
+    ? PropTypes.oneOf(['sm', 'md', 'lg'])
+    : PropTypes.oneOf(['default', 'field', 'small', 'sm', 'md', 'lg']),
 
   /**
    * Status of the file upload

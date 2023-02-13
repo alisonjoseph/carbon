@@ -5,34 +5,18 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-import { settings } from 'carbon-components';
-import cx from 'classnames';
 import PropTypes from 'prop-types';
 import React from 'react';
+import { useFeatureFlag } from '../FeatureFlags';
+import { CSSGrid } from './CSSGrid';
+import { FlexGrid } from './FlexGrid';
 
-const { prefix } = settings;
-
-function Grid({
-  as: BaseComponent = 'div',
-  condensed = false,
-  narrow = false,
-  fullWidth = false,
-  className: containerClassName,
-  children,
-  ...rest
-}) {
-  const className = cx(containerClassName, {
-    [`${prefix}--grid`]: true,
-    [`${prefix}--grid--condensed`]: condensed,
-    [`${prefix}--grid--narrow`]: narrow,
-    [`${prefix}--grid--full-width`]: fullWidth,
-  });
-
-  return (
-    <BaseComponent className={className} {...rest}>
-      {children}
-    </BaseComponent>
-  );
+function Grid(props) {
+  const enableCSSGrid = useFeatureFlag('enable-css-grid');
+  if (enableCSSGrid) {
+    return <CSSGrid {...props} />;
+  }
+  return <FlexGrid {...props} />;
 }
 
 Grid.propTypes = {
@@ -52,8 +36,8 @@ Grid.propTypes = {
   className: PropTypes.string,
 
   /**
-   * Collapse the gutter to 2px. Useful for fluid layouts.
-   * Rows have 2px of margin between them to match gutter.
+   * Collapse the gutter to 1px. Useful for fluid layouts.
+   * Rows have 1px of margin between them to match gutter.
    */
   condensed: PropTypes.bool,
 
@@ -69,4 +53,4 @@ Grid.propTypes = {
   narrow: PropTypes.bool,
 };
 
-export default Grid;
+export { Grid };

@@ -13,7 +13,7 @@
  */
 export default (config) => (fp) => {
   /**
-   * Adjusts the floating meun position after Flatpicker sets it.
+   * Adjusts the floating menu position after Flatpicker sets it.
    */
   const handlePreCalendarPosition = () => {
     Promise.resolve().then(() => {
@@ -23,14 +23,10 @@ export default (config) => (fp) => {
         _positionElement: positionElement,
       } = fp;
       const { appendTo } = fpConfig;
-      const {
-        left: containerLeft,
-        top: containerTop,
-      } = appendTo.getBoundingClientRect();
-      const {
-        left: refLeft,
-        bottom: refBottom,
-      } = positionElement.getBoundingClientRect();
+      const { left: containerLeft, top: containerTop } =
+        appendTo.getBoundingClientRect();
+      const { left: refLeft, bottom: refBottom } =
+        positionElement.getBoundingClientRect();
       if (
         (appendTo !== appendTo.ownerDocument.body ||
           containerLeft !== 0 ||
@@ -43,7 +39,7 @@ export default (config) => (fp) => {
           'Floating menu container must not have `position:static`.'
         );
       }
-      // `2` for negative mergin on calendar dropdown
+      // `2` for negative margin on calendar dropdown
       calendarContainer.style.top = `${refBottom - containerTop + 2}px`;
       calendarContainer.style.left = `${refLeft - containerLeft}px`;
     });

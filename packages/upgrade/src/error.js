@@ -5,10 +5,11 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-'use strict';
+class CustomError extends Error {
+  constructor(message) {
+    super(message);
+    this.name = this.constructor.name;
+  }
+}
 
-class UpgradeError extends Error {}
-
-module.exports = {
-  UpgradeError,
-};
+export class UpgradeError extends CustomError {}

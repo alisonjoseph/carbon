@@ -30,24 +30,38 @@ packages/components/docs/js
 # React
 **/storybook-static/**
 
+# Icons react
+packages/icons-react/next/**
+
 # Sketch
 **/*.sketchplugin/**
 
 # Changelogs
 **/CHANGELOG.md
 
-# Generated docs
-**/docs/sass.md
-
 # Generate sass files
 **/scss/vendor/**
 **/_inlined/**
 
 # Examples
-**/examples/**
+packages/**/examples/**
+!packages/themes/examples/**
+!packages/grid/examples/css-grid/**
 
 # Yarn
 **/.yarn/**
 
 # Generated files
 **/generated/**
+
+# Templates
+**/*.template.*
+
+# Nextjs
+.next
+
+# Upgrade
+packages/upgrade/cli.js
+
+# Accessibility Verification Testing
+**/.avt/**

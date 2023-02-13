@@ -44,7 +44,6 @@ async function check({
  * @param {object} options
  * @param {Adapter} [options.adapter] The adapter to use to load the extensions
  * @param {string} options.input The directory of source files
- * @param {string} [options.output] The directory for the built metadata
  * @param {Array<Extension>} [options.extensions] The extensions to load
  * @returns {Promise<object>}
  */
@@ -94,7 +93,8 @@ async function build({
   output = input,
 }) {
   const metadata = await load({ adapter, extensions, input });
-  const metadataFilePath = path.join(output.extensions, 'metadata.json');
+  const metadataFilePath =
+    output.metadata || path.join(output.extensions, 'metadata.json');
 
   await fs.ensureFile(metadataFilePath);
   await fs.writeJson(metadataFilePath, metadata, {

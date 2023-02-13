@@ -8,33 +8,39 @@
 import PropTypes from 'prop-types';
 import React from 'react';
 import cx from 'classnames';
-import { settings } from 'carbon-components';
+import { usePrefix } from '../../internal/usePrefix';
+import { CircleDash } from '@carbon/icons-react';
 
-const { prefix } = settings;
+function Step() {
+  const prefix = usePrefix();
+  return (
+    <li
+      className={`${prefix}--progress-step ${prefix}--progress-step--incomplete`}>
+      <div
+        className={`${prefix}--progress-step-button ${prefix}--progress-step-button--unclickable`}>
+        <CircleDash />
+        <p className={`${prefix}--progress-label`} />
+        <span className={`${prefix}--progress-line`} />
+      </div>
+    </li>
+  );
+}
 
-const step = (
-  <li
-    className={`${prefix}--progress-step ${prefix}--progress-step--incomplete`}>
-    <div
-      className={`${prefix}--progress-step-button ${prefix}--progress-step-button--unclickable`}>
-      <svg>
-        <path d="M 7, 7 m -7, 0 a 7,7 0 1,0 14,0 a 7,7 0 1,0 -14,0" />
-      </svg>
-      <p className={`${prefix}--progress-label`} />
-      <span className={`${prefix}--progress-line`} />
-    </div>
-  </li>
-);
-
-function ProgressIndicatorSkeleton({ className, ...rest }) {
+function ProgressIndicatorSkeleton({ className, vertical, ...rest }) {
+  const prefix = usePrefix();
   return (
     <ul
-      className={cx(`${prefix}--progress`, `${prefix}--skeleton`, className)}
+      className={cx(
+        `${prefix}--progress`,
+        `${prefix}--skeleton`,
+        { [`${prefix}--progress--vertical`]: vertical },
+        className
+      )}
       {...rest}>
-      {step}
-      {step}
-      {step}
-      {step}
+      <Step />
+      <Step />
+      <Step />
+      <Step />
     </ul>
   );
 }
@@ -44,6 +50,11 @@ ProgressIndicatorSkeleton.propTypes = {
    * Specify an optional className to add.
    */
   className: PropTypes.string,
+  /**
+   * Determines whether or not the ProgressIndicator should be rendered vertically.
+   */
+  vertical: PropTypes.bool,
 };
 
 export default ProgressIndicatorSkeleton;
+export { ProgressIndicatorSkeleton };

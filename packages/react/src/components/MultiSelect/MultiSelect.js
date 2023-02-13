@@ -5,22 +5,25 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-import { WarningFilled16 } from '@carbon/icons-react';
-import { settings } from 'carbon-components';
+import { WarningFilled, WarningAltFilled } from '@carbon/icons-react';
 import cx from 'classnames';
 import Downshift, { useSelect } from 'downshift';
 import isEqual from 'lodash.isequal';
 import PropTypes from 'prop-types';
-import React, { useRef, useState } from 'react';
+import React, { useContext, useRef, useState } from 'react';
 import ListBox, { PropTypes as ListBoxPropTypes } from '../ListBox';
 import { sortingPropTypes } from './MultiSelectPropTypes';
 import { defaultItemToString } from './tools/itemToString';
 import { defaultSortItems, defaultCompareItems } from './tools/sorting';
 import { useSelection } from '../../internal/Selection';
 import setupGetInstanceId from '../../tools/setupGetInstanceId';
-import { mapDownshiftProps } from '../../tools/createPropAdapter';
+import mergeRefs from '../../tools/mergeRefs';
+import deprecate from '../../prop-types/deprecate';
+import { keys, match } from '../../internal/keyboard';
+import { useFeatureFlag } from '../FeatureFlags';
+import { usePrefix } from '../../internal/usePrefix';
+import { FormContext } from '../FluidForm';
 
-const { prefix } = settings;
 const noop = () => {};
 const getInstanceId = setupGetInstanceId();
 const {
@@ -39,8 +42,10 @@ const MultiSelect = React.forwardRef(function MultiSelect(
     className: containerClassName,
     id,
     items,
+    itemToElement,
     itemToString,
     titleText,
+    hideLabel,
     helperText,
     label,
     type,
@@ -49,21 +54,31 @@ const MultiSelect = React.forwardRef(function MultiSelect(
     initialSelectedItems,
     sortItems,
     compareItems,
+    clearSelectionText,
+    clearSelectionDescription,
     light,
     invalid,
     invalidText,
+    warn,
+    warnText,
     useTitleInItem,
     translateWithId,
     downshiftProps,
     open,
     selectionFeedback,
     onChange,
+    onMenuChange,
     direction,
+    selectedItems: selected,
+    readOnly,
   },
   ref
 ) {
+  const prefix = usePrefix();
+  const { isFluid } = useContext(FormContext);
   const { current: multiSelectInstanceId } = useRef(getInstanceId());
   const [highlightedIndex, setHighlightedIndex] = useState(null);
+  const [isFocused, setIsFocused] = useState(false);
   const [isOpen, setIsOpen] = useState(open);
   const [prevOpenProp, setPrevOpenProp] = useState(open);
   const [topItems, setTopItems] = useState([]);
@@ -75,6 +90,7 @@ const MultiSelect = React.forwardRef(function MultiSelect(
     disabled,
     initialSelectedItems,
     onChange,
+    selectedItems: selected,
   });
 
   const {
@@ -83,39 +99,58 @@ const MultiSelect = React.forwardRef(function MultiSelect(
     getMenuProps,
     getItemProps,
     selectedItem: selectedItems,
-  } = useSelect(
-    mapDownshiftProps({
-      ...downshiftProps,
-      highlightedIndex,
-      isOpen,
-      itemToString,
-      onStateChange,
-      selectedItem: controlledSelectedItems,
-      items,
-    })
-  );
+  } = useSelect({
+    ...downshiftProps,
+    highlightedIndex,
+    isOpen,
+    itemToString: (items) => {
+      return items.map((item) => itemToString(item)).join(', ');
+    },
+    onStateChange,
+    selectedItem: controlledSelectedItems,
+    items,
+  });
+
+  /**
+   * wrapper function to forward changes to consumer
+   */
+  const setIsOpenWrapper = (open) => {
+    setIsOpen(open);
+    if (onMenuChange) {
+      onMenuChange(open);
+    }
+  };
 
   /**
    * programmatically control this `open` prop
    */
   if (prevOpenProp !== open) {
-    setIsOpen(open);
+    setIsOpenWrapper(open);
     setPrevOpenProp(open);
   }
 
   const inline = type === 'inline';
+  const showWarning = !invalid && warn;
+
+  const enabled = useFeatureFlag('enable-v11-release');
+
   const wrapperClasses = cx(
     `${prefix}--multi-select__wrapper`,
     `${prefix}--list-box__wrapper`,
+    [enabled ? containerClassName : null],
     {
       [`${prefix}--multi-select__wrapper--inline`]: inline,
       [`${prefix}--list-box__wrapper--inline`]: inline,
       [`${prefix}--multi-select__wrapper--inline--invalid`]: inline && invalid,
       [`${prefix}--list-box__wrapper--inline--invalid`]: inline && invalid,
+      [`${prefix}--list-box__wrapper--fluid--invalid`]: isFluid && invalid,
+      [`${prefix}--list-box__wrapper--fluid--focus`]:
+        !isOpen && isFluid && isFocused,
     }
   );
   const titleClasses = cx(`${prefix}--label`, {
     [`${prefix}--label--disabled`]: disabled,
+    [`${prefix}--visually-hidden`]: hideLabel,
   });
   const helperId = !helperText
     ? undefined
@@ -125,13 +160,22 @@ const MultiSelect = React.forwardRef(function MultiSelect(
     [`${prefix}--form__helper-text--disabled`]: disabled,
   });
 
-  const className = cx(`${prefix}--multi-select`, containerClassName, {
-    [`${prefix}--multi-select--invalid`]: invalid,
-    [`${prefix}--multi-select--inline`]: inline,
-    [`${prefix}--multi-select--selected`]:
-      selectedItems && selectedItems.length > 0,
-    [`${prefix}--list-box--up`]: direction === 'top',
-  });
+  const className = cx(
+    `${prefix}--multi-select`,
+    [enabled ? null : containerClassName],
+    {
+      [`${prefix}--multi-select--invalid`]: invalid,
+      [`${prefix}--multi-select--warning`]: showWarning,
+      [`${prefix}--multi-select--inline`]: inline,
+      [`${prefix}--multi-select--selected`]:
+        selectedItems && selectedItems.length > 0,
+      [`${prefix}--list-box--up`]: direction === 'top',
+      [`${prefix}--multi-select--readonly`]: readOnly,
+    }
+  );
+
+  // needs to be capitalized for react to render it correctly
+  const ItemToElement = itemToElement;
 
   const sortOptions = {
     selectedItems: controlledSelectedItems,
@@ -156,6 +200,9 @@ const MultiSelect = React.forwardRef(function MultiSelect(
       case ItemClick:
       case MenuKeyDownSpaceButton:
       case MenuKeyDownEnter:
+        if (changes.selectedItem === undefined) {
+          break;
+        }
         onItemChange(changes.selectedItem);
         break;
       case MenuKeyDownArrowDown:
@@ -164,46 +211,96 @@ const MultiSelect = React.forwardRef(function MultiSelect(
         break;
       case MenuBlur:
       case MenuKeyDownEscape:
-        setIsOpen(false);
+        setIsOpenWrapper(false);
         setHighlightedIndex(changes.highlightedIndex);
         break;
       case ToggleButtonClick:
-        setIsOpen(changes.isOpen || false);
+        setIsOpenWrapper(changes.isOpen || false);
         setHighlightedIndex(changes.highlightedIndex);
         break;
     }
   }
 
+  const onKeyDown = (e) => {
+    if (match(e, keys.Delete) && !disabled) {
+      clearSelection();
+      e.stopPropagation();
+    }
+  };
+
+  const toggleButtonProps = getToggleButtonProps();
+
+  const handleFocus = (evt) => {
+    evt.target.classList.contains(`${prefix}--tag__close-icon`)
+      ? setIsFocused(false)
+      : setIsFocused(evt.type === 'focus' ? true : false);
+  };
+
+  const readOnlyEventHandlers = readOnly
+    ? {
+        onClick: (evt) => {
+          // NOTE: does not prevent click
+          evt.preventDefault();
+          // focus on the element as per readonly input behavior
+          evt.target.focus();
+        },
+        onKeyDown: (evt) => {
+          const selectAccessKeys = ['ArrowDown', 'ArrowUp', ' ', 'Enter'];
+          // This prevents the select from opening for the above keys
+          if (selectAccessKeys.includes(evt.key)) {
+            evt.preventDefault();
+          }
+        },
+      }
+    : {};
+
   return (
     <div className={wrapperClasses}>
-      {titleText && (
-        <label className={titleClasses} {...getLabelProps()}>
-          {titleText}
-        </label>
-      )}
+      <label className={titleClasses} {...getLabelProps()}>
+        {titleText && titleText}
+        {selectedItems.length > 0 && (
+          <span className={`${prefix}--visually-hidden`}>
+            {clearSelectionDescription} {selectedItems.length},
+            {clearSelectionText}
+          </span>
+        )}
+      </label>
       <ListBox
+        onFocus={isFluid ? handleFocus : null}
+        onBlur={isFluid ? handleFocus : null}
         type={type}
         size={size}
         className={className}
         disabled={disabled}
+        readOnly={readOnly}
         light={light}
         invalid={invalid}
         invalidText={invalidText}
+        warn={warn}
+        warnText={warnText}
         isOpen={isOpen}
         id={id}>
         {invalid && (
-          <WarningFilled16 className={`${prefix}--list-box__invalid-icon`} />
+          <WarningFilled className={`${prefix}--list-box__invalid-icon`} />
+        )}
+        {showWarning && (
+          <WarningAltFilled
+            className={`${prefix}--list-box__invalid-icon ${prefix}--list-box__invalid-icon--warning`}
+          />
         )}
         <button
           type="button"
-          ref={ref}
           className={`${prefix}--list-box__field`}
           disabled={disabled}
-          aria-disabled={disabled}
-          {...getToggleButtonProps()}>
+          aria-disabled={disabled || readOnly}
+          {...toggleButtonProps}
+          ref={mergeRefs(toggleButtonProps.ref, ref)}
+          onKeyDown={onKeyDown}
+          {...readOnlyEventHandlers}>
           {selectedItems.length > 0 && (
             <ListBox.Selection
-              clearSelection={!disabled ? clearSelection : noop}
+              readOnly={readOnly}
+              clearSelection={!disabled && !readOnly ? clearSelection : noop}
               selectionCount={selectedItems.length}
               translateWithId={translateWithId}
               disabled={disabled}
@@ -219,6 +316,10 @@ const MultiSelect = React.forwardRef(function MultiSelect(
             sortItems(items, sortOptions).map((item, index) => {
               const itemProps = getItemProps({
                 item,
+                // we don't want Downshift to set aria-selected for us
+                // we also don't want to set 'false' for reader verbosity's sake
+                ['aria-selected']: isChecked ? true : null,
+                disabled: item.disabled,
               });
               const itemText = itemToString(item);
               const isChecked =
@@ -228,6 +329,7 @@ const MultiSelect = React.forwardRef(function MultiSelect(
                 <ListBox.MenuItem
                   key={itemProps.id}
                   isActive={isChecked}
+                  aria-label={itemText}
                   isHighlighted={highlightedIndex === index}
                   title={itemText}
                   {...itemProps}>
@@ -237,7 +339,11 @@ const MultiSelect = React.forwardRef(function MultiSelect(
                       className={`${prefix}--checkbox-label`}
                       data-contained-checkbox-state={isChecked}
                       id={`${itemProps.id}__checkbox`}>
-                      {itemText}
+                      {itemToElement ? (
+                        <ItemToElement key={itemProps.id} {...item} />
+                      ) : (
+                        itemText
+                      )}
                     </span>
                   </div>
                 </ListBox.MenuItem>
@@ -245,7 +351,7 @@ const MultiSelect = React.forwardRef(function MultiSelect(
             })}
         </ListBox.Menu>
       </ListBox>
-      {!inline && !invalid && helperText && (
+      {!inline && !invalid && !warn && helperText && (
         <div id={helperId} className={helperClasses}>
           {helperText}
         </div>
@@ -257,6 +363,16 @@ const MultiSelect = React.forwardRef(function MultiSelect(
 MultiSelect.displayName = 'MultiSelect';
 MultiSelect.propTypes = {
   ...sortingPropTypes,
+
+  /**
+   * Specify the text that should be read for screen readers that describes total items selected
+   */
+  clearSelectionDescription: PropTypes.string,
+
+  /**
+   * Specify the text that should be read for screen readers to clear selection.
+   */
+  clearSelectionText: PropTypes.string,
 
   /**
    * Specify the direction of the multiselect dropdown. Can be either top or bottom.
@@ -272,6 +388,11 @@ MultiSelect.propTypes = {
    * Additional props passed to Downshift
    */
   downshiftProps: PropTypes.shape(Downshift.propTypes),
+
+  /**
+   * Specify whether the title text should be hidden or not
+   */
+  hideLabel: PropTypes.bool,
 
   /**
    * Specify a custom `id`
@@ -292,7 +413,13 @@ MultiSelect.propTypes = {
   /**
    * If invalid, what is the error?
    */
-  invalidText: PropTypes.string,
+  invalidText: PropTypes.node,
+
+  /**
+   * Function to render items as custom components instead of strings.
+   * Defaults to null and is overridden by a getter
+   */
+  itemToElement: PropTypes.func,
 
   /**
    * Helper function passed to downshift that allows the library to render a
@@ -316,7 +443,11 @@ MultiSelect.propTypes = {
   /**
    * `true` to use the light version.
    */
-  light: PropTypes.bool,
+  light: deprecate(
+    PropTypes.bool,
+    'The `light` prop for `MultiSelect` has ' +
+      'been deprecated in favor of the new `Layer` component. It will be removed in the next major release.'
+  ),
 
   /**
    * Specify the locale of the control. Used for the default `compareItems`
@@ -326,14 +457,30 @@ MultiSelect.propTypes = {
 
   /**
    * `onChange` is a utility for this controlled component to communicate to a
-   * consuming component what kind of internal state changes are occuring.
+   * consuming component what kind of internal state changes are occurring.
    */
   onChange: PropTypes.func,
+
+  /**
+   * `onMenuChange` is a utility for this controlled component to communicate to a
+   * consuming component that the menu was opend(`true`)/closed(`false`).
+   */
+  onMenuChange: PropTypes.func,
 
   /**
    * Initialize the component with an open(`true`)/closed(`false`) menu.
    */
   open: PropTypes.bool,
+
+  /**
+   * Whether or not the Dropdown is readonly
+   */
+  readOnly: PropTypes.bool,
+
+  /**
+   * For full control of the selected items
+   */
+  selectedItems: PropTypes.array,
 
   /**
    * Specify feedback (mode) of the selection.
@@ -344,7 +491,7 @@ MultiSelect.propTypes = {
   selectionFeedback: PropTypes.oneOf(['top', 'fixed', 'top-after-reopen']),
 
   /**
-   * Specify the size of the ListBox. Currently supports either `sm`, `lg` or `xl` as an option.
+   * Specify the size of the ListBox. Currently supports either `sm`, `md` or `lg` as an option.
    */
   size: ListBoxPropTypes.ListBoxSize,
 
@@ -352,7 +499,7 @@ MultiSelect.propTypes = {
    * Provide text to be used in a `<label>` element that is tied to the
    * multiselect via ARIA attributes.
    */
-  titleText: PropTypes.string,
+  titleText: PropTypes.node,
 
   /**
    * Callback function for translating ListBoxMenuIcon SVG title
@@ -368,6 +515,16 @@ MultiSelect.propTypes = {
    * Specify title to show title on hover
    */
   useTitleInItem: PropTypes.bool,
+
+  /**
+   * Specify whether the control is currently in warning state
+   */
+  warn: PropTypes.bool,
+
+  /**
+   * Provide the text that is displayed when the control is in warning state
+   */
+  warnText: PropTypes.node,
 };
 
 MultiSelect.defaultProps = {
@@ -378,11 +535,13 @@ MultiSelect.defaultProps = {
   initialSelectedItems: [],
   sortItems: defaultSortItems,
   type: 'default',
-  light: false,
   title: false,
   open: false,
   selectionFeedback: 'top-after-reopen',
   direction: 'bottom',
+  clearSelectionText: 'To clear selection, press Delete or Backspace,',
+  clearSelectionDescription: 'Total items selected: ',
+  selectedItems: null,
 };
 
 export default MultiSelect;

@@ -1,57 +1,78 @@
-import React, { useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import classNames from 'classnames';
 import PropTypes from 'prop-types';
-import { settings } from 'carbon-components';
-import { View16, ViewOff16, WarningFilled16 } from '@carbon/icons-react';
+import { View, ViewOff } from '@carbon/icons-react';
+import { useNormalizedInputProps } from '../../internal/useNormalizedInputProps';
 import { textInputProps } from './util';
-
-const { prefix } = settings;
+import { FormContext } from '../FluidForm';
+import * as FeatureFlags from '@carbon/feature-flags';
+import deprecate from '../../prop-types/deprecate';
+import { usePrefix } from '../../internal/usePrefix';
 
 const PasswordInput = React.forwardRef(function PasswordInput(
   {
-    labelText,
     className,
-    id,
-    placeholder,
-    onChange,
-    onClick,
-    hideLabel,
-    invalid,
-    invalidText,
+    disabled = false,
     helperText,
+    hideLabel,
+    hidePasswordLabel = 'Hide password',
+    id,
+    inline,
+    invalid = false,
+    invalidText,
+    labelText,
     light,
+    onChange = () => {},
+    onClick = () => {},
+    onTogglePasswordVisibility,
+    placeholder,
+    size = 'md',
+    showPasswordLabel = 'Show password',
     tooltipPosition = 'bottom',
     tooltipAlignment = 'center',
-    hidePasswordLabel = 'Hide password',
-    showPasswordLabel = 'Show password',
-    size,
-    ...other
+    type = 'password',
+    warn,
+    warnText,
+    ...rest
   },
   ref
 ) {
-  const [inputType, setInputType] = useState('password');
-  const togglePasswordVisibility = () =>
+  const [inputType, setInputType] = useState(type);
+  const prefix = usePrefix();
+  const normalizedProps = useNormalizedInputProps({
+    id,
+    invalid,
+    invalidText,
+    warn,
+    warnText,
+  });
+
+  const { isFluid } = useContext(FormContext);
+
+  const handleTogglePasswordVisibility = (event) => {
     setInputType(inputType === 'password' ? 'text' : 'password');
-  const errorId = id + '-error-msg';
+    onTogglePasswordVisibility && onTogglePasswordVisibility(event);
+  };
   const textInputClasses = classNames(
     `${prefix}--text-input`,
     `${prefix}--password-input`,
     className,
     {
       [`${prefix}--text-input--light`]: light,
-      [`${prefix}--text-input--invalid`]: invalid,
+      [`${prefix}--text-input--invalid`]: normalizedProps.invalid,
+      [`${prefix}--text-input--warning`]: normalizedProps.warn,
       [`${prefix}--text-input--${size}`]: size,
     }
   );
   const sharedTextInputProps = {
     id,
     onChange: (evt) => {
-      if (!other.disabled) {
+      if (!disabled) {
         onChange(evt);
       }
     },
     onClick: (evt) => {
-      if (!other.disabled) {
+      if (!disabled) {
         onClick(evt);
       }
     },
@@ -59,37 +80,69 @@ const PasswordInput = React.forwardRef(function PasswordInput(
     type: inputType,
     className: textInputClasses,
     ref,
-    ...other,
+    ...rest,
   };
+  const inputWrapperClasses = classNames(
+    `${prefix}--form-item`,
+    `${prefix}--text-input-wrapper`,
+    `${prefix}--password-input-wrapper`,
+    {
+      [`${prefix}--text-input-wrapper--light`]: light,
+      [`${prefix}--text-input-wrapper--inline`]: inline,
+      [`${prefix}--text-input--fluid`]: isFluid,
+    }
+  );
   const labelClasses = classNames(`${prefix}--label`, {
     [`${prefix}--visually-hidden`]: hideLabel,
-    [`${prefix}--label--disabled`]: other.disabled,
+    [`${prefix}--label--disabled`]: disabled,
+    [`${prefix}--label--inline`]: inline,
+    [`${prefix}--label--inline--${size}`]: inline && !!size,
   });
   const helperTextClasses = classNames(`${prefix}--form__helper-text`, {
-    [`${prefix}--form__helper-text--disabled`]: other.disabled,
+    [`${prefix}--form__helper-text--disabled`]: disabled,
+    [`${prefix}--form__helper-text--inline`]: inline,
   });
+  const fieldOuterWrapperClasses = classNames(
+    `${prefix}--text-input__field-outer-wrapper`,
+    {
+      [`${prefix}--text-input__field-outer-wrapper--inline`]: inline,
+    }
+  );
+  const fieldWrapperClasses = classNames(
+    `${prefix}--text-input__field-wrapper`,
+    {
+      [`${prefix}--text-input__field-wrapper--warning`]: normalizedProps.warn,
+    }
+  );
+  const iconClasses = classNames({
+    [`${prefix}--text-input__invalid-icon`]:
+      normalizedProps.invalid || normalizedProps.warn,
+    [`${prefix}--text-input__invalid-icon--warning`]: normalizedProps.warn,
+  });
+
   const label = labelText ? (
     <label htmlFor={id} className={labelClasses}>
       {labelText}
     </label>
   ) : null;
-  const error = invalid ? (
-    <div className={`${prefix}--form-requirement`} id={errorId}>
-      {invalidText}
-    </div>
+  const helper = helperText ? (
+    <div className={helperTextClasses}>{helperText}</div>
   ) : null;
+
   const passwordIsVisible = inputType === 'text';
   const passwordVisibilityIcon = passwordIsVisible ? (
-    <ViewOff16 className={`${prefix}--icon-visibility-off`} />
+    <ViewOff className={`${prefix}--icon-visibility-off`} />
   ) : (
-    <View16 className={`${prefix}--icon-visibility-on`} />
+    <View className={`${prefix}--icon-visibility-on`} />
   );
   const passwordVisibilityToggleClasses = classNames(
     `${prefix}--text-input--password__visibility__toggle`,
+    `${prefix}--btn`,
     `${prefix}--btn--icon-only`,
     `${prefix}--tooltip__trigger`,
     `${prefix}--tooltip--a11y`,
     {
+      [`${prefix}--btn--disabled`]: disabled,
       [`${prefix}--tooltip--${tooltipPosition}`]: tooltipPosition,
       [`${prefix}--tooltip--align-${tooltipAlignment}`]: tooltipAlignment,
     }
@@ -97,50 +150,72 @@ const PasswordInput = React.forwardRef(function PasswordInput(
   const input = (
     <>
       <input
-        {...textInputProps({ invalid, sharedTextInputProps, errorId })}
+        {...textInputProps({
+          sharedTextInputProps,
+          invalid: normalizedProps.invalid,
+          invalidId: normalizedProps.invalidId,
+          warn: normalizedProps.warn,
+          warnId: normalizedProps.warnId,
+        })}
+        disabled={disabled}
         data-toggle-password-visibility={inputType === 'password'}
       />
+      {isFluid && <hr className={`${prefix}--text-input__divider`} />}
       <button
         type="button"
         className={passwordVisibilityToggleClasses}
-        onClick={togglePasswordVisibility}>
-        <span className={`${prefix}--assistive-text`}>
-          {passwordIsVisible ? hidePasswordLabel : showPasswordLabel}
-        </span>
+        disabled={disabled}
+        onClick={handleTogglePasswordVisibility}>
+        {!disabled && (
+          <span className={`${prefix}--assistive-text`}>
+            {passwordIsVisible ? hidePasswordLabel : showPasswordLabel}
+          </span>
+        )}
         {passwordVisibilityIcon}
       </button>
     </>
   );
-  const helper = helperText ? (
-    <div className={helperTextClasses}>{helperText}</div>
-  ) : null;
+
+  useEffect(() => {
+    setInputType(type);
+  }, [type]);
 
   return (
-    <div
-      className={`${prefix}--form-item ${prefix}--text-input-wrapper ${prefix}--password-input-wrapper`}>
-      {label}
-      <div
-        className={`${prefix}--text-input__field-wrapper`}
-        data-invalid={invalid || null}>
-        {invalid && (
-          <WarningFilled16 className={`${prefix}--text-input__invalid-icon`} />
-        )}
-        {input}
+    <div className={inputWrapperClasses}>
+      {!inline ? (
+        label
+      ) : (
+        <div className={`${prefix}--text-input__label-helper-wrapper`}>
+          {label}
+          {!isFluid && helper}
+        </div>
+      )}
+      <div className={fieldOuterWrapperClasses}>
+        <div
+          className={fieldWrapperClasses}
+          data-invalid={normalizedProps.invalid || null}>
+          {normalizedProps.icon && (
+            <normalizedProps.icon className={iconClasses} />
+          )}
+          {input}
+          {isFluid && !inline && normalizedProps.validation}
+        </div>
+        {!isFluid && !inline && (normalizedProps.validation || helper)}
       </div>
-      {error ? error : helper}
     </div>
   );
 });
 
+PasswordInput.displayName = 'PasswordInput';
 PasswordInput.propTypes = {
   /**
    * Provide a custom className that is applied directly to the underlying
-   * <input> node
+   * `<input>` node
    */
   className: PropTypes.string,
 
   /**
-   * Optionally provide the default value of the <input>
+   * Optionally provide the default value of the `<input>`
    */
   defaultValue: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
 
@@ -170,6 +245,11 @@ PasswordInput.propTypes = {
   id: PropTypes.string.isRequired,
 
   /**
+   * `true` to use the inline version.
+   */
+  inline: PropTypes.bool,
+
+  /**
    * Specify whether the control is currently invalid
    */
   invalid: PropTypes.bool,
@@ -177,7 +257,7 @@ PasswordInput.propTypes = {
   /**
    * Provide the text that is displayed when the control is in an invalid state
    */
-  invalidText: PropTypes.string,
+  invalidText: PropTypes.node,
 
   /**
    * Provide the text that will be read by a screen reader when visiting this
@@ -186,24 +266,35 @@ PasswordInput.propTypes = {
   labelText: PropTypes.node.isRequired,
 
   /**
-   * Specify light version or default version of this control
+   * `true` to use the light version. For use on $ui-01 backgrounds only.
+   * Don't use this to make tile background color same as container background color.
    */
-  light: PropTypes.bool,
+  light: deprecate(
+    PropTypes.bool,
+    'The `light` prop for `PasswordInput` has ' +
+      'been deprecated in favor of the new `Layer` component. It will be removed in the next major release.'
+  ),
 
   /**
-   * Optionally provide an `onChange` handler that is called whenever <input>
+   * Optionally provide an `onChange` handler that is called whenever `<input>`
    * is updated
    */
   onChange: PropTypes.func,
 
   /**
    * Optionally provide an `onClick` handler that is called whenever the
-   * <input> is clicked
+   * `<input>` is clicked
    */
   onClick: PropTypes.func,
 
   /**
-   * Specify the placeholder attribute for the <input>
+   * Callback function that is called whenever the toggle password visibility
+   * button is clicked
+   */
+  onTogglePasswordVisibility: PropTypes.func,
+
+  /**
+   * Specify the placeholder attribute for the `<input>`
    */
   placeholder: PropTypes.string,
 
@@ -213,9 +304,11 @@ PasswordInput.propTypes = {
   showPasswordLabel: PropTypes.string,
 
   /**
-   * Specify the size of the Text Input. Currently supports either `small` or `large` as an option. If omitted, defaults to standard size
+   * Specify the size of the Text Input. Supports `sm`, `md`, or `lg`.
    */
-  size: PropTypes.string,
+  size: FeatureFlags.enabled('enable-v11-release')
+    ? PropTypes.oneOf(['sm', 'md', 'lg'])
+    : PropTypes.string,
 
   /**
    * Specify the alignment of the tooltip to the icon-only button.
@@ -230,21 +323,24 @@ PasswordInput.propTypes = {
   tooltipPosition: PropTypes.oneOf(['top', 'right', 'bottom', 'left']),
 
   /**
-   * Provide the current value of the <input>
+   * The input type, either password or text
+   */
+  type: PropTypes.oneOf(['password', 'text']),
+
+  /**
+   * Provide the current value of the `<input>`
    */
   value: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
-};
 
-PasswordInput.defaultProps = {
-  className: '${prefix}--text__input',
-  disabled: false,
-  onChange: () => {},
-  onClick: () => {},
-  invalid: false,
-  invalidText: '',
-  helperText: '',
-  light: false,
-  size: '',
+  /**
+   * Specify whether the control is currently in warning state
+   */
+  warn: PropTypes.bool,
+
+  /**
+   * Provide the text that is displayed when the control is in warning state
+   */
+  warnText: PropTypes.node,
 };
 
 export default PasswordInput;

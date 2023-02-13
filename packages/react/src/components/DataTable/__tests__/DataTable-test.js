@@ -103,7 +103,7 @@ describe('DataTable', () => {
                   id="custom-id"
                 />
                 <TableToolbarMenu>
-                  <TableToolbarAction primaryFocus onClick={jest.fn()}>
+                  <TableToolbarAction onClick={jest.fn()}>
                     Action 1
                   </TableToolbarAction>
                   <TableToolbarAction onClick={jest.fn()}>
@@ -113,7 +113,7 @@ describe('DataTable', () => {
                     Action 3
                   </TableToolbarAction>
                 </TableToolbarMenu>
-                <Button onClick={jest.fn()} size="small" kind="primary">
+                <Button onClick={jest.fn()} size="sm" kind="primary">
                   Add new
                 </Button>
               </TableToolbarContent>
@@ -390,7 +390,7 @@ describe('DataTable', () => {
                     id="custom-id"
                   />
                   <TableToolbarMenu>
-                    <TableToolbarAction primaryFocus onClick={jest.fn()}>
+                    <TableToolbarAction onClick={jest.fn()}>
                       Action 1
                     </TableToolbarAction>
                     <TableToolbarAction onClick={jest.fn()}>
@@ -400,7 +400,7 @@ describe('DataTable', () => {
                       Action 3
                     </TableToolbarAction>
                   </TableToolbarMenu>
-                  <Button onClick={jest.fn()} size="small" kind="primary">
+                  <Button onClick={jest.fn()} size="sm" kind="primary">
                     Add new
                   </Button>
                 </TableToolbarContent>
@@ -874,7 +874,7 @@ describe('DataTable', () => {
 
   describe('sticky header', () => {
     it('should render', () => {
-      const wrapper = mount(<DataTable stickyHeader={true} {...mockProps} />);
+      const wrapper = mount(<DataTable {...mockProps} />);
       expect(wrapper).toMatchSnapshot();
     });
   });

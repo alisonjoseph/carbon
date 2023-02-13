@@ -8,17 +8,19 @@
 import PropTypes from 'prop-types';
 import React from 'react';
 import cx from 'classnames';
-import { settings } from 'carbon-components';
+import { usePrefix } from '../../internal/usePrefix';
 
-const { prefix } = settings;
-
-const Breadcrumb = ({
-  'aria-label': ariaLabel,
-  children,
-  className: customClassNameNav,
-  noTrailingSlash,
-  ...rest
-}) => {
+const Breadcrumb = React.forwardRef(function Breadcrumb(
+  {
+    'aria-label': ariaLabel,
+    children,
+    className: customClassNameNav,
+    noTrailingSlash,
+    ...rest
+  },
+  ref
+) {
+  const prefix = usePrefix();
   const className = cx({
     [`${prefix}--breadcrumb`]: true,
     [`${prefix}--breadcrumb--no-trailing-slash`]: noTrailingSlash,
@@ -28,12 +30,14 @@ const Breadcrumb = ({
     <nav
       className={customClassNameNav}
       aria-label={ariaLabel ? ariaLabel : 'Breadcrumb'}
+      ref={ref}
       {...rest}>
       <ol className={className}>{children}</ol>
     </nav>
   );
-};
+});
 
+Breadcrumb.displayName = 'Breadcrumb';
 Breadcrumb.propTypes = {
   /**
    * Specify the label for the breadcrumb container

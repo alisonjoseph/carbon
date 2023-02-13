@@ -3,8 +3,13 @@ categories:
     subcategories:
       - name: Controls
         members:
+          - center-to-fit
+          - continue
+          - continue--filled
           - dashboard
           - dashboard--reference
+          - fit-to-height
+          - fit-to-width
           - fit-to-screen
           - forward--10
           - forward--30
@@ -39,8 +44,15 @@ categories:
           - rewind--5
           - settings
           - settings--adjust
+          - settings--check
+          - settings--services
+          - settings--view
           - shrink-screen
           - shrink-screen--filled
+          - side-panel--close
+          - side-panel--close--filled
+          - side-panel--open
+          - side-panel--open--filled
           - skip--back
           - skip--back--filled
           - skip--back--outline
@@ -61,13 +73,26 @@ categories:
           - video--add
           - video--chat
           - volume--down
+          - volume--down--alt
           - volume--down--filled
+          - volume--down--filled--alt
           - volume--mute
           - volume--mute--filled
           - volume--up
+          - volume--up--alt
           - volume--up--filled
+          - volume--up--filled--alt
       - name: Formatting
         members:
+          - align-box--bottom-center
+          - align-box--bottom-left
+          - align-box--bottom-right
+          - align-box--middle-center
+          - align-box--middle-left
+          - align-box--middle-right
+          - align-box--top-center
+          - align-box--top-left
+          - align-box--top-right
           - align--horizontal-center
           - align--horizontal-left
           - align--horizontal-right
@@ -75,19 +100,36 @@ categories:
           - align--vertical-center
           - align--vertical-top
           - attachment
+          - asterisk
+          - border--bottom
+          - border--full
+          - border--left
+          - border--none
+          - border--right
+          - border--top
           - brightness-contrast
+          - bring-forward
+          - bring-to-front
+          - button--centered
+          - button--flush-left
+          - circle--solid
           - color-palette
           - color-switch
+          - column--delete
+          - column--insert
           - contrast
           - corner
           - crop
           - cut
+          - cut-out
           - distribute--horizontal-center
           - distribute--horizontal-left
           - distribute--horizontal-right
           - distribute--vertical-bottom
           - distribute--vertical-center
           - distribute--vertical-top
+          - document--horizontal
+          - document--vertical
           - dot-mark
           - draw
           - drop-photo
@@ -97,22 +139,35 @@ categories:
           - erase
           - eyedropper
           - gradient
+          - group-objects
+          - group-objects--new
+          - group-objects--save
+          - horizontal-view
           - image
+          - image--copy
           - image--reference
+          - label
           - language
           - lasso
+          - lasso--polygon
           - link
           - list--boxes
           - list--bulleted
-          - list--numbered
           - list--checked
+          - list--checked--mirror
+          - list--numbered
+          - list--numbered--mirror
           - magic-wand
           - magic-wand--filled
           - no-image
           - opacity
+          - page-break
+          - page-number
           - paint-brush
           - paint-brush--alt
           - paragraph
+          - pen
+          - pen--fountain
           - percentage
           - percentage--filled
           - quotes
@@ -126,20 +181,33 @@ categories:
           - rotate--counterclockwise--alt
           - rotate--counterclockwise--alt--filled
           - rotate--counterclockwise--filled
+          - row--delete
+          - row--insert
           - save
           - select--01
           - select--02
+          - send-backward
+          - send-to-back
+          - shape--except
+          - shape--exclude
+          - shape--intersect
+          - shape--join
+          - shape--unite
           - spell-check
           - spray-paint
           - text--align--center
           - text--align--left
           - text--align--justify
+          - text--align--mixed
           - text--align--right
           - text--all-caps
           - text--bold
+          - text--clear-format
           - text--color
           - text--creation
           - text--fill
+          - text--font
+          - text--footnote
           - text--highlight
           - text--indent
           - text--indent--less
@@ -160,14 +228,16 @@ categories:
           - text--vertical-alignment
           - text--wrap
           - trash-can
+          - ungroup-objects
           - unlink
+          - unsaved
+          - vertical-view
       - name: Navigation
         members:
           - add
           - add--alt
           - add--filled
           - apps
-          - app-switcher
           - arrow--down
           - arrow--down-left
           - arrow--down-right
@@ -176,7 +246,6 @@ categories:
           - arrow--up
           - arrow--up-left
           - arrow--up-right
-          - back-to-top
           - caret--down
           - caret--left
           - caret--right
@@ -196,62 +265,92 @@ categories:
           - overflow-menu--vertical
           - page--first
           - page--last
+          - select--window
           - subtract
           - subtract--alt
           - switcher
           - up-to-top
+          - zoom--area
+          - zoom--fit
           - zoom--in
+          - zoom--in-area
           - zoom--out
+          - zoom--out-area
           - zoom--reset
       - name: Operations
         members:
           - add-comment
+          - area
+          - area--custom
           - arrow-shift-down
-          - arrows
           - arrows--horizontal
           - arrows--vertical
           - automatic
           - bookmark
+          - bookmark--add
+          - bookmark--filled
           - branch
+          - build-tool
           - caret--sort
           - caret--sort--down
           - caret--sort--up
+          - catalog--publish
           - center--circle
           - center--square
           - change-catalog
           - chat
+          - chat--launch
+          - chat--off
           - chevron--mini
           - chevron--sort
           - chevron--sort--down
           - chevron--sort--up
           - choices
+          - choose-item
           - circle-dash
           - clean
           - collapse-all
           - collapse-categories
+          - commit
           - compare
           - connect
-          - delete
+          - connect--recursive
+          - connect--reference
+          - connect--source
+          - connect--target
+          - continuous-deployment
+          - continuous-integration
+          - convert-to-cloud
           - deploy
           - deploy-rules
           - drag--horizontal
           - drag--vertical
-          - edit-filter
+          - drill-back
+          - drill-down
+          - drill-through
           - exit
           - expand-all
           - expand-categories
+          - explore
           - fade
           - filter
           - filter--edit
           - filter--remove
           - filter--reset
           - flag
+          - flag--filled
           - fork
+          - function-math
           - image--search
+          - image--search--alt
           - insert
           - insert--page
+          - insert-syntax
+          - inspection
+          - intersect
           - jump-link
           - launch
+          - layers
           - login
           - logout
           - loop
@@ -269,37 +368,65 @@ categories:
           - not-sent--filled
           - operations--field
           - operations--record
+          - overlay
           - package
+          - pan--horizontal
+          - pan--vertical
+          - pause-future
+          - pause-past
           - pin
+          - pin--filled
+          - promote
+          - query
           - recently-viewed
           - recommend
           - redo
           - renew
           - repeat
           - repeat--one
+          - replicate
           - reply
+          - reply--all
           - request-quote
           - reset
           - reset--alt
           - restart
+          - retry--failed
+          - review
           - rotate
           - run
+          - run--mirror
           - save--model
           - scan
+          - scan--alt
+          - scan--disabled
           - search
+          - search--advanced
+          - search--locate
+          - search--locate--mirror
           - send
           - send--alt
           - send--alt--filled
           - send--filled
           - shuffle
+          - sort--ascending
+          - sort--descending
+          - sort--remove
           - split
           - split-screen
           - tag
           - tag--edit
+          - tag--export
           - tag--group
+          - tag--import
+          - tag--none
+          - test-tool
           - translate
+          - transpose
           - undo
+          - update-now
           - upgrade
+          - view-next
           - workspace--import
           - x-axis
           - y-axis
@@ -314,13 +441,12 @@ categories:
           - checkbox
           - checkbox--checked
           - checkbox--checked--filled
-          - checkbox--undeterminate
-          - checkbox--undeterminate--filled
           - checkbox--indeterminate
           - checkbox--indeterminate--filled
           - column
           - favorite
           - favorite--filled
+          - favorite--half
           - flash
           - flash--filled
           - flash--off
@@ -340,9 +466,19 @@ categories:
           - notification--off
           - notification--off--filled
           - phone
+          - phone--application
           - phone--filled
+          - phone--block
+          - phone--block--filled
+          - phone--incoming
+          - phone--incoming--filled
           - phone--off
           - phone--off--filled
+          - phone--outgoing
+          - phone--outgoing--filled
+          - phone--settings
+          - phone--voice
+          - phone--voice--filled
           - radio-button
           - radio-button--checked
           - row
@@ -354,7 +490,9 @@ categories:
           - thumbnail--1
           - thumbnail--2
           - thumbs-down
+          - thumbs-down--filled
           - thumbs-up
+          - thumbs-up--filled
           - trophy
           - trophy--filled
           - unlocked
@@ -370,10 +508,33 @@ categories:
           - view--off--filled
   - name: Brand
     subcategories:
+      - name: Design and development
+        members:
+          - logo--angular
+          - logo--ansible-community
+          - logo--figma
+          - logo--invision
+          - logo--jupyter
+          - logo--keybase
+          - logo--kubernetes
+          - logo--npm
+          - logo--openshift
+          - logo--python
+          - logo--r-script
+          - logo--react
+          - logo--red-hat-ansible
+          - logo--sketch
+          - logo--svelte
+          - logo--vmware
+          - logo--vmware--alt
+          - logo--vue
       - name: IBM
         members:
           - bee
           - carbon
+          - carbon-for-ibm-dotcom
+          - carbon-for-ibm-product
+          - carbon--ui-builder
           - cloud-app
           - edt-loop
           - ibm-cloud
@@ -383,6 +544,7 @@ categories:
       - name: Social
         members:
           - logo--digg
+          - logo--discord
           - logo--facebook
           - logo--flickr
           - logo--github
@@ -398,40 +560,188 @@ categories:
           - logo--snapchat
           - logo--tumblr
           - logo--twitter
+          - logo--wechat
           - logo--xing
           - logo--yelp
           - logo--youtube
   - name: Enterprise
     subcategories:
+      - name: App catalogue
+        members:
+          - autoscaling
+          - block-storage
+          - object-storage
+          - cics--transaction-server-zos
+          - cloud--auditing
+          - cloud--logging
+          - cloud--monitoring
+          - cloud-foundry--1
+          - cloud-registry
+          - cloud-satellite
+          - cloud-satellite--config
+          - cloud-satellite--link
+          - cloud-satellite--services
+          - content-delivery-network
+          - database--datastax
+          - database--elastic
+          - database--enterprise-db2
+          - database--etcd
+          - database--mongodb
+          - database--postgreSQL
+          - database--rabbit
+          - database--redis
+          - direct-link
+          - dns-services
+          - flow-logs-vpc
+          - ibm--bluepay
+          - ibm--content-services
+          - ibm--data-replication
+          - ibm--datastage
+          - ibm--db2
+          - ibm--db2--alt
+          - ibm--match-360
+          - ibm--mq
+          - ibm--open-enterprise-languages
+          - ibm--power-vs
+          - ibm--telehealth
+          - ibm--tenet
+          - ibm--toolchain
+          - ibm-cloud--app-id
+          - ibm-cloud--citrix-daas
+          - ibm-cloud--continuous-delivery
+          - ibm-cloud--dedicated-host
+          - ibm-cloud--direct-link-1--connect
+          - ibm-cloud--direct-link-1--dedicated
+          - ibm-cloud--direct-link-1--dedicated-hosting
+          - ibm-cloud--direct-link-1--exchange
+          - ibm-cloud--direct-link-2--connect
+          - ibm-cloud--direct-link-2--dedicated
+          - ibm-cloud--direct-link-2--dedicated-hosting
+          - ibm-cloud--event-notification
+          - ibm-cloud--event-streams
+          - ibm-cloud--for-education
+          - ibm-cloud--HSM
+          - ibm-cloud--hyper-protect-crypto-services
+          - ibm-cloud--hyper-protect-dbaas
+          - ibm-cloud--hyper-protect-vs
+          - ibm-cloud--internet-services
+          - ibm-cloud--ipsec-vpn
+          - ibm-cloud--key-protect
+          - ibm-cloud--kubernetes-service
+          - ibm-cloud--logging
+          - ibm-cloud--mass-data-migration
+          - ibm-cloud--pal
+          - ibm-cloud--privileged-access-gateway
+          - ibm-cloud--secrets-manager
+          - ibm-cloud--security-compliance-center
+          - ibm-cloud--subnets
+          - ibm-cloud--sysdig-secure
+          - ibm-cloud--transit-gateway
+          - ibm-cloud--vpc-endpoints
+          - ibm-cloud-pak--applications
+          - ibm-cloud-pak--business-automation
+          - ibm-cloud-pak--data
+          - ibm-cloud-pak--integration
+          - ibm-cloud-pak--MANTA-automated-data-lineage
+          - ibm-cloud-pak--multicloud-mgmt
+          - ibm-cloud-pak--netezza
+          - ibm-cloud-pak--network-automation
+          - ibm-cloud-pak--security
+          - ibm-cloud-pak--system
+          - ibm-cloud-pak--watson-aiops
+          - ibm-security--services
+          - ibm-watson--assistant
+          - ibm-watson--discovery
+          - ibm-watson--knowledge-catalog
+          - ibm-watson--knowledge-studio
+          - ibm-watson--language-translator
+          - ibm-watson--machine-learning
+          - ibm-watson--natural-language-classifier
+          - ibm-watson--natural-language-understanding
+          - ibm-watson--openscale
+          - ibm-watson--orders
+          - ibm-watson--query
+          - ibm-watson--speech-to-text
+          - ibm-watson--studio
+          - ibm-watson--text-to-speech
+          - ibm-watson--tone-analyzer
+          - ibm-z--cloud-mod-stack
+          - ibm-z-cloud--provisioning
+          - ibm-z-os--package-manager
+          - infrastructure--classic
+          - load-balancer--vpc
+          - scis--control-tower
+          - scis--transparent-supply
+          - virtual-private-cloud--alt
+          - vlan--ibm
       - name: Commerce
         members:
           - apple
+          - apple--dash
           - account
           - basketball
+          - bat
+          - bee-bat
+          - bottles--01
+          - bottles--01--dash
+          - bottles--02
+          - bottles--02--dash
+          - bottles--container
           - building
           - corn
+          - currency
+          - currency--baht
+          - currency--dollar
+          - currency--euro
+          - currency--lira
+          - currency--pound
+          - currency--ruble
+          - currency--rupee
+          - currency--shekel
+          - currency--won
+          - currency--yen
+          - delivery
+          - delivery--add
+          - delivery--parcel
+          - drink--01
+          - drink--02
           - enterprise
           - finance
           - fish
           - fish--multiple
+          - fragile
           - fruit-bowl
           - gift
           - industry
           - inventory-management
+          - keep-dry
           - money
+          - monster
           - noodle-bowl
+          - piggy-bank
+          - piggy-bank--slot
           - purchase
           - receipt
+          - recycle
           - shopping--bag
           - shopping--cart
+          - shopping--cart--arrow-down
+          - shopping--cart--arrow-up
+          - shopping--cart--clear
+          - shopping--cart--error
+          - shopping--cart--minus
+          - shopping--cart--plus
           - shopping--catalog
           - soccer
           - sprout
+          - stack-limitation
           - store
           - strawberry
           - tennis
           - tennis-ball
+          - this-side-up
           - tree
+          - two-person-lift
           - wallet
           - wheat
           - wireless-checkout
@@ -463,6 +773,8 @@ categories:
           - annotation-visibility
           - arrow--annotation
           - auto-scroll
+          - brush-freehand
+          - brush-polygon
           - cd--archive
           - cd--create-archive
           - cd--create-exchange
@@ -470,6 +782,9 @@ categories:
           - chemistry--reference
           - circle-measurement
           - cobb-angle
+          - contour--draw
+          - contour--edit
+          - contour-finding
           - coronavirus
           - cross-reference
           - cut-in-half
@@ -487,10 +802,14 @@ categories:
           - fusion-blender
           - hanging-protocol
           - health-cross
+          - HL7-attributes
           - hole-filling
           - hole-filling--cursor
           - iCA-2D
           - image--medical
+          - image-availability--local
+          - image-availability--retrieving
+          - image-availability--unavailable
           - interactive-segmentation-cursor
           - launch-study--1
           - launch-study--2
@@ -508,6 +827,7 @@ categories:
           - pills--add
           - pills--subtract
           - pointer-text
+          - QC-launch
           - region-analysis--area
           - region-analysis--volume
           - registration
@@ -526,16 +846,25 @@ categories:
           - stacked-move
           - stacked-scrolling--1
           - stacked-scrolling--2
+          - status--acknowledge
+          - status--change
+          - status--partial-fail
+          - status--resolved
           - stress-breath-editor
           - study--next
           - study--previous
+          - study--read
           - study--skip
+          - study--transfer
+          - study--unread
+          - study--view
           - sub-volume
           - threshold
           - thumbnail-preview
           - text-annotation-toggle
           - window--auto
           - window--base
+          - window--black-saturation
           - window--overlay
           - window--preset
           - zoom-pan
@@ -557,9 +886,6 @@ categories:
           - operation
           - operation--gauge
           - operation--if
-          - research--bloch-sphere
-          - research--hinton-plot
-          - research--matrix
           - S
           - S--alt
           - T
@@ -574,6 +900,14 @@ categories:
     subcategories:
       - name: Alphanumeric
         members:
+          - character--decimal
+          - character--fraction
+          - character--integer
+          - character--lower-case
+          - character--negative-number
+          - character--sentence-case
+          - character--upper-case
+          - character--whole-number
           - letter--Aa
           - letter--Bb
           - letter--Cc
@@ -620,24 +954,46 @@ categories:
           - number--small--7
           - number--small--8
           - number--small--9
+          - beta
           - omega
           - sigma
       - name: Data
         members:
           - activity
           - analytics
+          - analytics--custom
           - analytics--reference
           - app-connectivity
           - archive
           - blockchain
+          - boolean
+          - boot-volume
+          - boot-volume--alt
           - box-plot
+          - calculation
+          - calculation--alt
+          - calendar--heat-map
           - character-patterns
           - chart--3D
           - chart--area
+          - chart--area-smooth
+          - chart--area-stepper
+          - chart--average
           - chart--bar
+          - chart--bar-floating
+          - chart--bar-overlay
+          - chart--bar-stacked
+          - chart--bar-target
           - chart--bubble
+          - chart--bubble-packed
+          - chart--bullet
           - chart--candlestick
           - chart--cluster-bar
+          - chart--column
+          - chart--column-floating
+          - chart--column-target
+          - chart--combo
+          - chart--combo-stacked
           - chart--custom
           - chart--error-bar
           - chart--error-bar--alt
@@ -646,31 +1002,46 @@ categories:
           - chart--histogram
           - chart--line
           - chart--line--data
+          - chart--line-smooth
+          - chart--marimekko
+          - chart--maximum
+          - chart--minimum
+          - chart--median
           - chart--multi-line
           - chart--multitype
           - chart--network
           - chart--parallel
           - chart--pie
+          - chart--point
           - chart--population
           - chart--radar
+          - chart--radial
           - chart--relationship
           - chart--ring
           - chart--river
           - chart--rose
           - chart--scatter
+          - chart--spiral
           - chart--stacked
           - chart--stepper
+          - chart--sunburst
           - chart--treemap
           - chart--t-sne
           - chart--venn-diagram
+          - chart--violin-plot
+          - chart--waterfall
+          - chart--win-loss
+          - choropleth-map
           - circle-packing
           - circle--filled
           - classifier--language
-          - cloud--data-ops
-          - cloud-satellite
+          - column-dependency
           - concept
           - container-software
+          - cost
+          - cost--total
           - covariate
+          - cross-tab
           - data--1
           - data--2
           - data--base
@@ -678,11 +1049,21 @@ categories:
           - data--check
           - data--connected
           - data--error
+          - data--format
           - data--reference
           - data--set
           - data--structured
           - data--unstructured
+          - data--view
+          - data--view--alt
+          - data-bin
           - data-class
+          - data-collection
+          - data-definition
+          - data-enrichment
+          - data-enrichment--add
+          - data-player
+          - data-quality-definition
           - data-refinery
           - data-refinery--reference
           - data-share
@@ -692,63 +1073,91 @@ categories:
           - data-vis--2
           - data-vis--3
           - data-vis--4
+          - data-volume
+          - data-volume--alt
           - datastore
+          - decision-tree
           - diagram
           - diagram--reference
           - document-sentiment
           - double-integer
+          - driver-analysis
           - factor
           - flow
           - flow--connection
           - flow--data
+          - flow--modeler
+          - flow--modeler--reference
           - flow--stream
           - flow--stream--reference
           - graphical-data-flow
+          - growth
           - hashtag
           - heat-map
           - heat-map--02
           - heat-map--03
+          - heat-map--stocks
           - hybrid-networking
           - improve-relevance
           - interactions
           - increase-level
+          - join--full
           - join--inner
           - join--left
           - join--outer
           - join--right
+          - linux
+          - linux--alt
           - managed-solutions
           - math-curve
           - model-builder
           - model-builder--reference
+          - name-space
           - network--1
           - network--2
           - network--3
           - network--3--reference
           - network--4
+          - network--4--reference
           - nominal
-          - object-storage
           - ordinal
           - parent-child
+          - parameter
           - phrase-sentiment
           - presentation-file
+          - progress-bar
+          - progress-bar--round
           - qq-plot
+          - quadrant-plot
           - query-queue
           - report
           - report--data
           - row--collapse
           - row--expand
+          - sankey-diagram
+          - sankey-diagram--alt
           - scatter-matrix
           - schematics
           - share-knowledge
+          - show-data--cards
           - skill-level
           - skill-level--advanced
           - skill-level--basic
           - skill-level--intermediate
           - stem-leaf-plot
+          - storage-pool
+          - storage-request
           - string-integer
           - string-text
+          - subflow
+          - subflow--local
+          - summary--KPI
+          - summary--KPI--mirror
           - sys-provision
           - table
+          - table--alias
+          - table--built
+          - table--shortcut
           - table--split
           - term
           - text-link
@@ -756,15 +1165,18 @@ categories:
           - text-mining
           - text-mining--applier
           - time-plot
+          - transform--binary
+          - transform--instructions
+          - transform--language
           - tree-view
           - tree-view--alt
           - type-pattern
           - types
+          - value--variable
           - virtual-column
           - virtual-column--key
           - virtual-machine
           - virtual-private-cloud
-          - virtual-private-cloud--alt
           - visual-recognition
           - vmdk-disk
           - word-cloud
@@ -777,6 +1189,7 @@ categories:
           - app
           - application
           - badge
+          - book
           - CAD
           - catalog
           - categories
@@ -792,34 +1205,51 @@ categories:
           - closed-caption
           - closed-caption--alt
           - closed-caption--filled
-          - cloud-foundry--1
           - cloud-foundry--2
+          - content-view
           - copy
           - copy--file
+          - copy--link
           - course
           - CSV
+          - cube
+          - cube-view
           - DOC
           - document
           - document--add
+          - document--attachment
+          - document--audio
           - document--blank
           - document--download
+          - document--epdf
           - document--export
           - document--import
           - document--pdf
+          - document--preliminary
+          - document--protected
+          - document--security
+          - document--signed
+          - document--sketch
           - document--subtract
           - document--tasks
           - document--unknown
+          - document--unprotected
+          - document--video
           - document--view
           - document--word-processor
           - document--word-processor--reference
           - download
           - DVR
           - export
+          - floorplan
           - folder
           - folder--add
           - folder--details
           - folder--details--reference
+          - folder--move-to
           - folder--off
+          - folder--open
+          - folder--parent
           - folder--shared
           - folders
           - gamification
@@ -831,6 +1261,7 @@ categories:
           - HTML
           - HTML--reference
           - HTTP
+          - import-export
           - ISO
           - ISO--filled
           - ISO--outline
@@ -838,8 +1269,18 @@ categories:
           - JSON
           - JSON--reference
           - legend
+          - license
+          - license--draft
+          - license--global
+          - license--maintenance
+          - license--maintenance-draft
+          - license--third-party
+          - license--third-party-draft
           - list--dropdown
+          - media--library
+          - media--library--filled
           - model
+          - model--alt
           - model--reference
           - MOV
           - MP3
@@ -847,13 +1288,18 @@ categories:
           - MPEG
           - MPG2
           - music
+          - music--add
+          - music--remove
           - no-ticket
+          - non-certified
           - notebook
           - notebook--reference
+          - order-details
           - panel-expansion
           - paste
           - PDF
           - PDF--reference
+          - plan
           - playlist
           - PNG
           - policy
@@ -861,18 +1307,38 @@ categories:
           - PPT
           - product
           - RAW
+          - repo--artifact
+          - repo--source-code
           - roadmap
           - rule
+          - rule--cancelled
+          - rule--data-quality
+          - rule--draft
+          - rule--filled
+          - rule--test
+          - result
+          - result--new
+          - result--old
           - scale
           - script
           - script--reference
           - SDK
           - security
+          - SLM
           - SQL
           - star--review
           - SVG
           - table-of-contents
           - task
+          - task--add
+          - task--approved
+          - task--asset-view
+          - task--complete
+          - task--location
+          - task--remove
+          - task--settings
+          - task--star
+          - task--tools
           - task--view
           - template
           - ticket
@@ -881,6 +1347,8 @@ categories:
           - TXT
           - TXT--reference
           - upload
+          - version
+          - websheet
           - WMV
           - workspace
           - XLS
@@ -889,6 +1357,8 @@ categories:
           - ZIP--reference
       - name: Status
         members:
+          - caution
+          - caution-inverted
           - checkmark
           - checkmark--filled
           - checkmark--filled--error
@@ -896,9 +1366,17 @@ categories:
           - checkmark--outline
           - checkmark--outline--error
           - checkmark--outline--warning
+          - circle-fill
+          - circle-stroke
+          - condition--point
+          - condition--wait-point
+          - critical
+          - critical-severity
+          - diamond-fill
           - error
           - error--filled
           - error--outline
+          - low-severity
           - help
           - help--filled
           - in-progress
@@ -909,15 +1387,16 @@ categories:
           - incomplete--error
           - incomplete--warning
           - information
+          - information--disabled
           - information--filled
           - information--square
           - information--square--filled
           - misuse
-          - misuse--alt
           - misuse--outline
           - pending
           - pending--filled
           - queued
+          - square-fill
           - undefined
           - undefined--filled
           - unknown
@@ -928,8 +1407,172 @@ categories:
           - warning--alt-inverted
           - warning--alt-inverted--filled
           - warning--filled
+          - warning--hex
+          - warning--hex--filled
+          - warning--other
           - warning-square
           - warning-square--filled
+      - name: Systems
+        members:
+          - application--mobile
+          - application--virtual
+          - application--web
+          - assembly
+          - assembly--cluster
+          - assembly--reference
+          - bare-metal-server
+          - bare-metal-server--01
+          - bare-metal-server--02
+          - bastion-host
+          - batch-job
+          - batch-job--step
+          - block-storage--alt
+          - box--extra-large
+          - box--large
+          - box--medium
+          - box--small
+          - cics--cmas
+          - cics--db2-connection
+          - cics--explorer
+          - cics--program
+          - cics--sit
+          - cics--sit-overrides
+          - cics--system-group
+          - cics--wui-region
+          - cics-region
+          - cics-region--alt
+          - cics-region--routing
+          - cics-region--target
+          - cicsplex
+          - cloud--alerting
+          - cloud--data-ops
+          - cloud-services
+          - cloud--service-management
+          - chat--operational
+          - code-signing-service
+          - communication--unified
+          - container-registry
+          - container-services
+          - data--center
+          - data-accessor
+          - data-backup
+          - data-blob
+          - data-diode
+          - db2--buffer-pool
+          - db2--data-sharing-group
+          - db2--database
+          - deployment-unit--data
+          - deployment-unit--execution
+          - deployment-unit--installation
+          - deployment-unit--presentation
+          - deployment-unit--technical--data
+          - deployment-unit--technical--execution
+          - deployment-unit--technical--installation
+          - deployment-unit--technical--presentation
+          - directory-domain
+          - edge-node--alt
+          - encryption
+          - executable-program
+          - file-storage
+          - firewall
+          - firewall--classic
+          - floating-ip
+          - gateway
+          - gateway--api
+          - gateway--mail
+          - gateway--public
+          - gateway--security
+          - gateway--user-access
+          - gateway--vpn
+          - group--access
+          - group--account
+          - group--resource
+          - group--security
+          - gui
+          - gui--management
+          - hardware-security-module
+          - hybrid-networking--alt
+          - id-management
+          - image-service
+          - instance--bx
+          - instance--classic
+          - instance--cx
+          - instance--mx
+          - instance--virtual
+          - intent-request--active
+          - intent-request--create
+          - intent-request--heal
+          - intent-request--inactive
+          - intent-request--scale-in
+          - intent-request--scale-out
+          - intent-request--uninstall
+          - intent-request--upgrade
+          - intrusion-prevention
+          - kubernetes
+          - load-balancer--application
+          - load-balancer--classic
+          - load-balancer--global
+          - load-balancer--listener
+          - load-balancer--local
+          - load-balancer--network
+          - load-balancer--pool
+          - logical-partition
+          - message-queue
+          - microservices--1
+          - microservices--2
+          - mobility--services
+          - network--admin-control
+          - network--enterprise
+          - network--overlay
+          - network--public
+          - object-storage--alt
+          - pcn--e-node
+          - pcn--military
+          - pcn--p-node
+          - pcn--z-node
+          - point-of-presence
+          - property-relationship
+          - router
+          - router--voice
+          - router--wifi
+          - screen-map
+          - screen-map--set
+          - security-services
+          - server--dns
+          - server--proxy
+          - server--time
+          - session-border-control
+          - slisor
+          - software-resource
+          - software-resource--cluster
+          - software-resource--resource
+          - subnet-acl-rules
+          - switch-layer-2
+          - switch-layer-3
+          - tcp-ip-service
+          - terminal--3270
+          - tsq
+          - two-factor-authentication
+          - vehicle--api
+          - vehicle--connected
+          - vehicle--insights
+          - vehicle--services
+          - virtual-desktop
+          - vlan
+          - volume--block-storage
+          - volume--file-storage
+          - volume--object-storage
+          - vpn--connection
+          - vpn--policy
+          - wifi-bridge
+          - wifi-bridge--alt
+          - wifi--not-secure
+          - wifi--secure
+          - workflow-automation
+          - z--lpar
+          - z--systems
+          - zos
+          - zos--sysplex
   - name: Person
     subcategories:
       - name: Senses
@@ -938,10 +1581,15 @@ categories:
           - hearing
           - idea
           - movement
+          - need
           - smell
           - taste
           - touch--1
+          - touch--1-down
+          - touch--1-down--filled
+          - touch--1--filled
           - touch--2
+          - touch--2--filled
           - touch--interaction
       - name: User
         members:
@@ -950,7 +1598,9 @@ categories:
           - accessibility--color
           - accessibility--color--filled
           - collaborate
+          - cough
           - credentials
+          - dog-walker
           - education
           - events
           - events--alt
@@ -972,15 +1622,19 @@ categories:
           - face--satisfied--filled
           - face--wink
           - face--wink--filled
+          - friendship
           - gender--female
           - gender--male
           - group
+          - group--presentation
           - identification
           - partnership
           - person
           - person--favorite
+          - sight
           - transgender
           - user
+          - user--access
           - user--activity
           - user--admin
           - user--avatar
@@ -994,14 +1648,18 @@ categories:
           - user--filled
           - user--follow
           - user--identification
+          - user--military
           - user--multiple
           - user--online
           - user--profile
           - user--role
+          - user--service-desk
+          - user--settings
           - user--simulation
           - user--speaker
           - user--x-ray
           - user-profile--alt
+          - voice-activate
   - name: Planning
     subcategories:
       - name: Time
@@ -1010,7 +1668,10 @@ categories:
           - alarm--add
           - alarm--subtract
           - calendar
+          - calendar--add
+          - calendar--add--alt
           - calendar--settings
+          - calendar--tools
           - event
           - event--schedule
           - hourglass
@@ -1021,10 +1682,22 @@ categories:
           - timer
       - name: Travel
         members:
+          - airline--digital-gate
+          - airline--manage-gates
+          - airline--passenger-care
+          - airline--rapid-board
+          - airport--01
+          - airport--02
+          - airport-location
           - arrival
+          - baggage-claim
           - bar
           - bicycle
+          - boot
           - bus
+          - cabin-care
+          - cabin-care--alert
+          - cabin-care--alt
           - cafe
           - campsite
           - car
@@ -1032,6 +1705,10 @@ categories:
           - charging-station
           - charging-station--filled
           - compass
+          - construction
+          - crossroads
+          - crowd-report
+          - crowd-report--filled
           - cyclist
           - delivery-truck
           - departure
@@ -1041,6 +1718,12 @@ categories:
           - direction--bear-right--02--filled
           - direction--curve
           - direction--curve--filled
+          - direction--fork
+          - direction--fork--filled
+          - direction--loop-left
+          - direction--loop-left--filled
+          - direction--loop-right
+          - direction--loop-right--filled
           - direction--merge
           - direction--merge--filled
           - direction--right--01
@@ -1071,7 +1754,11 @@ categories:
           - earth--southeast-asia--filled
           - fire
           - flagging-taxi
+          - flight--international
+          - flight--roster
+          - flight--schedule
           - gas-station
+          - gas-station--filled
           - globe
           - harbor
           - helicopter
@@ -1079,26 +1766,79 @@ categories:
           - hospital
           - hospital-bed
           - hotel
+          - lifesaver
           - location
+          - location--company
+          - location--company--filled
+          - location--filled
+          - location--hazard
+          - location--hazard--filled
+          - location--heart
+          - location--heart--filled
+          - location--person
+          - location--person--filled
+          - location--save
+          - location--star
+          - location--star--filled
           - map
+          - map--center
+          - map--identify
+          - map-boundary
           - milestone
+          - military-camp
           - monument
           - mountain
+          - navaid--civil
+          - navaid--dme
+          - navaid--helipad
+          - navaid--military
+          - navaid--military-civil
+          - navaid--ndb
+          - navaid--ndb-dme
+          - navaid--private
+          - navaid--seaplane
+          - navaid--tacan
+          - navaid--vhfor
+          - navaid--vor
+          - navaid--vordme
+          - navaid--vortac
+          - palm-tree
+          - passenger--drinks
+          - passenger--plus
           - pedestrian
           - pedestrian-child
+          - pedestrian--family
           - picnic-area
           - plane
+          - plane--private
+          - plane--sea
           - police
           - restaurant
           - restaurant--fine
+          - road
+          - road--weather
           - scooter
           - scooter--front
           - service-desk
           - shuttle
+          - stop-sign
+          - stop-sign--filled
           - swim
+          - tank
           - taxi
           - theater
+          - traffic--event
+          - traffic--flow
+          - traffic--flow-incident
+          - traffic--incident
+          - traffic--weather-incident
+          - traffic-cone
           - train
+          - train--heart
+          - train--profile
+          - train--speed
+          - train--ticket
+          - train--time
           - tram
           - van
           - worship
@@ -1107,36 +1847,69 @@ categories:
           - worship--muslim
       - name: Weather
         members:
+          - accumulation--ice
+          - accumulation--precipitation
+          - accumulation--rain
+          - accumulation--snow
+          - agriculture-analytics
+          - buoy
+          - carbon-accounting
           - cloud
-          - cloud--lightning
-          - cloud--rain
-          - cloud--snow
+          - cloud-ceiling
           - cloudy
+          - crop-growth
+          - crop-health
           - dew-point
           - dew-point--filled
+          - drought
+          - earthquake
+          - energy--renewable
+          - flood
+          - flood--warning
           - fog
+          - forecast--hail
+          - forecast--hail-30
+          - forecast--lightning
+          - forecast--lightning-30
           - hail
           - haze
           - haze--night
           - humidity
           - humidity--alt
           - hurricane
+          - ice--accretion
+          - ice--vision
           - lightning
+          - map-boundary--vegetation
+          - marine-warning
           - mixed-rain-hail
           - moon
+          - moonrise
+          - moonset
           - mostly-cloudy
           - mostly-cloudy--night
           - not-available
+          - observed--hail
+          - observed--lightning
+          - outlook-severe
           - partly-cloudy
           - partly-cloudy--night
+          - pest
           - pressure
           - pressure--filled
+          - radar--enhanced
+          - radar--weather
           - rain
           - rain--drizzle
           - rain--heavy
           - rain--scattered
           - rain--scattered--night
           - rain-drop
+          - ref-evapotranspiration
+          - sailboat--coastal
+          - sailboat--offshore
+          - satellite--radar
+          - satellite--weather
           - sleet
           - smoke
           - snow
@@ -1144,37 +1917,81 @@ categories:
           - snow--heavy
           - snow--scattered
           - snow--scattered--night
+          - snow-density
           - snowflake
+          - soil-moisture
+          - soil-moisture--field
+          - soil-moisture--global
+          - soil-temperature
+          - soil-temperature--field
+          - soil-temperature--global
+          - solar-panel
+          - stay-inside
+          - storm-tracker
           - sun
-          - sunny
           - sunrise
           - sunset
           - temperature
+          - temperature--celsius
+          - temperature--celsius--alt
+          - temperature--fahrenheit
+          - temperature--fahrenheit--alt
+          - temperature--feels-like
           - temperature--frigid
           - temperature--hot
+          - temperature--inversion
+          - temperature--max
+          - temperature--min
+          - temperature--water
           - thunderstorm
           - thunderstorm--scattered
           - thunderstorm--scattered--night
           - thunderstorm--severe
           - thunderstorm--strong
+          - tides
           - tornado
+          - tornado-warning
+          - tree--fall-risk
           - tropical-storm
+          - tropical-storm--model-tracks
+          - tropical-storm--tracks
+          - tropical-warning
+          - tsunami
           - uv-index
+          - uv-index--alt
           - uv-index--filled
+          - vegetation--asset
+          - wave-direction
+          - wave-height
+          - wave-period
+          - weather-front--cold
+          - weather-front--stationary
+          - weather-front--warm
+          - weather-station
+          - wind-gusts
+          - wind-power
+          - wind-stream
           - windy
           - windy--dust
           - windy--snow
           - windy--strong
+          - winter-warning
           - wintry-mix
   - name: Tools
     subcategories:
       - name: Technology
         members:
+          - airplay
+          - airplay--filled
           - aperture
           - asset
+          - asset--confirm
+          - asset--digital-twin
+          - asset--view
           - at
           - audio-console
           - augmented-reality
+          - barcode
           - battery--charging
           - battery--empty
           - battery--full
@@ -1185,6 +2002,7 @@ categories:
           - bluetooth
           - bluetooth--off
           - bot
+          - breaking-change
           - building--insights-1
           - building--insights-2
           - building--insights-3
@@ -1192,18 +2010,38 @@ categories:
           - calculator--check
           - camera
           - camera--action
+          - cell-tower
           - chat-bot
           - chip
           - cloud--download
+          - cloud--offline
           - cloud--upload
           - code
+          - code--hide
           - code--reference
           - connection-signal
+          - connection-signal--off
+          - connection--receive
+          - connection--send
+          - connection--two-way
+          - cookie
           - debug
+          - deployment-pattern
+          - deployment-policy
+          - desk--adjustable
           - development
           - devices
+          - drone
+          - drone--delivery
+          - drone--front
+          - drone--video
+          - edge-cluster
+          - edge-device
+          - edge-node
+          - edge-service
           - email
           - email--new
+          - equalizer
           - fetch-upload
           - fetch-upload--cloud
           - fingerprint-recognition
@@ -1217,38 +2055,50 @@ categories:
           - iot--connect
           - iot--platform
           - keyboard
+          - keyboard--off
           - laptop
-          - logo--jupyter
-          - logo--openshift
-          - logo--python
-          - logo--r-script
-          - logo--vmware
+          - location--current
           - machine-learning
+          - machine-learning-model
           - mail--all
           - mail--reply
+          - media-cast
           - mobile
           - mobile--add
           - mobile--audio
           - mobile--check
           - mobile--download
           - mobile--landscape
+          - outage
           - password
+          - phone--ip
           - plug
           - plug--filled
+          - port--input
+          - port--output
           - printer
           - qr-code
           - radio
+          - radio--combat
+          - radio--push-to-talk
           - rocket
           - rss
+          - satellite
           - share
+          - signal-strength
+          - sim-card
+          - service-id
           - tablet
           - tablet--landscape
           - terminal
+          - transmission-lte
           - USB
           - voicemail
           - VPN
           - watch
+          - webhook
           - wifi
+          - wifi--controller
           - wifi--off
           - wikis
       - name: Instruments
@@ -1263,11 +2113,16 @@ categories:
           - meter--alt
           - microscope
           - portfolio
+          - radar
           - ruler
           - ruler--alt
+          - scales
+          - scales--tipped
           - scalpel
           - stamp
           - stethoscope
           - tool-box
+          - tool-kit
           - tools
+          - tools--alt
           - umbrella

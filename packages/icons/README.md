@@ -24,9 +24,10 @@ Icons in Carbon are provided through a variety of packages, often specific for
 the framework that will use them. Currently, we support the following packages
 for various frameworks:
 
-- [Angular](../icons-angular)
+- [Angular](https://github.com/carbon-design-system/carbon-icons-angular)
 - [React](../icons-react)
 - [Vue](../icons-vue)
+- [Svelte](https://github.com/IBM/carbon-icons-svelte)
 
 We also support using icons in Vanilla JavaScript.
 
@@ -89,7 +90,7 @@ svg [data-icon-path='inner-path'] {
 }
 ```
 
-In the code snippet above, we are targetting the inner path attribute with
+In the code snippet above, we are targeting the inner path attribute with
 `[data-icon-path="inner-path"]`. The value of `fill` will be the custom color
 you would like to set for the inner path. We also need to set `opacity` to `1`
 in order to get this inner path to be visible on the page.
@@ -99,13 +100,6 @@ in order to get this inner path to be visible on the page.
 You can view a full reference of our icons
 [here](https://carbon-elements.netlify.com/icons/examples/preview/) . This is
 useful for finding the path information in order to import an icon.
-
-## 📖 API Documentation
-
-If you're looking for `@carbon/icons` API documentation, check out:
-
-- [Contributing](./docs/contributing.md)
-- [Sass](./docs/sass.md)
 
 ## 🙌 Contributing
 

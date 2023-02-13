@@ -5,23 +5,36 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-import React, { useState, useCallback, useEffect } from 'react';
-import { settings } from 'carbon-components';
+import React, { useState, useCallback, useEffect, useRef } from 'react';
+import classnames from 'classnames';
 import FileUploaderItem from '../FileUploaderItem';
 import FileUploaderDropContainer from '../FileUploaderDropContainer';
 import FormItem from '../../FormItem';
-import uid from '../../../tools/uniqueId';
 
-const { prefix } = settings;
+// import uid from '../../../tools/uniqueId';
+import '../FileUploader-story.scss';
+
+const prefix = 'cds';
+
+// -- copied from internal/tools/uniqueId.js
+let lastId = 0;
+function uid(prefix = 'id') {
+  lastId++;
+  return `${prefix}${lastId}`;
+}
+// -- end copied
 
 const ExampleDropContainerApp = (props) => {
   const [files, setFiles] = useState([]);
+  const uploaderButton = useRef(null);
   const handleDrop = (e) => {
     e.preventDefault();
   };
+
   const handleDragover = (e) => {
     e.preventDefault();
   };
+
   useEffect(() => {
     document.addEventListener('drop', handleDrop);
     document.addEventListener('dragover', handleDragover);
@@ -30,6 +43,7 @@ const ExampleDropContainerApp = (props) => {
       document.removeEventListener('dragover', handleDragover);
     };
   }, []);
+
   const uploadFile = async (fileToUpload) => {
     // file size validation
     if (fileToUpload.filesize > 512000) {
@@ -40,6 +54,24 @@ const ExampleDropContainerApp = (props) => {
         invalid: true,
         errorSubject: 'File size exceeds limit',
         errorBody: '500kb max file size. Select a new file and try again.',
+      };
+      setFiles((files) =>
+        files.map((file) =>
+          file.uuid === fileToUpload.uuid ? updatedFile : file
+        )
+      );
+      return;
+    }
+
+    // file type validation
+    if (fileToUpload.invalidFileType) {
+      const updatedFile = {
+        ...fileToUpload,
+        status: 'edit',
+        iconDescription: 'Delete file',
+        invalid: true,
+        errorSubject: 'Invalid file type',
+        errorBody: `"${fileToUpload.name}" does not have a valid file type.`,
       };
       setFiles((files) =>
         files.map((file) =>
@@ -78,6 +110,7 @@ const ExampleDropContainerApp = (props) => {
       );
     }, rand + 1000);
   };
+
   const onAddFiles = useCallback(
     (evt, { addedFiles }) => {
       evt.stopPropagation();
@@ -87,6 +120,7 @@ const ExampleDropContainerApp = (props) => {
         filesize: file.size,
         status: 'uploading',
         iconDescription: 'Uploading',
+        invalidFileType: file.invalidFileType,
       }));
       // eslint-disable-next-line react/prop-types
       if (props.multiple) {
@@ -100,19 +134,41 @@ const ExampleDropContainerApp = (props) => {
     // eslint-disable-next-line react/prop-types
     [files, props.multiple]
   );
+
   const handleFileUploaderItemClick = useCallback(
-    (evt, { uuid: clickedUuid }) =>
-      setFiles(files.filter(({ uuid }) => clickedUuid !== uuid)),
+    (_, { uuid: clickedUuid }) => {
+      uploaderButton.current.focus();
+      return setFiles(files.filter(({ uuid }) => clickedUuid !== uuid));
+    },
     [files]
   );
+
+  const labelClasses = classnames(`${prefix}--file--label`, {
+    // eslint-disable-next-line react/prop-types
+    [`${prefix}--file--label--disabled`]: props.disabled,
+  });
+
+  const helperTextClasses = classnames(`${prefix}--label-description`, {
+    // eslint-disable-next-line react/prop-types
+    [`${prefix}--label-description--disabled`]: props.disabled,
+  });
+
   return (
     <FormItem>
-      <strong className={`${prefix}--file--label`}>Account photo</strong>
-      <p className={`${prefix}--label-description`}>
-        Only .jpg and .png files. 500kb max file size
+      <p className={labelClasses}>Upload files</p>
+      <p className={helperTextClasses}>
+        Max file size is 500kb. Supported file types are .jpg and .png.
       </p>
-      <FileUploaderDropContainer {...props} onAddFiles={onAddFiles} />
-      <div className={`${prefix}--file-container`} style={{ width: '100%' }}>
+      <FileUploaderDropContainer
+        {...props}
+        onAddFiles={onAddFiles}
+        innerRef={uploaderButton}
+      />
+      <div
+        className={classnames(
+          `${prefix}--file-container`,
+          `${prefix}--file-container--drop`
+        )}>
         {files.map(
           ({
             uuid,

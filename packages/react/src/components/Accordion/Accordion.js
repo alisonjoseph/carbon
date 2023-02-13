@@ -5,27 +5,37 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-import { settings } from 'carbon-components';
 import cx from 'classnames';
+import { usePrefix } from '../../internal/usePrefix';
 import PropTypes from 'prop-types';
 import React from 'react';
+import * as FeatureFlags from '@carbon/feature-flags';
 
-const { prefix } = settings;
-
-function Accordion({ align, children, className: customClassName, ...rest }) {
+function Accordion({
+  align = 'end',
+  children,
+  className: customClassName,
+  disabled = false,
+  isFlush = false,
+  size = 'md',
+  ...rest
+}) {
+  const prefix = usePrefix();
   const className = cx(`${prefix}--accordion`, customClassName, {
     [`${prefix}--accordion--${align}`]: align,
+    [`${prefix}--accordion--${size}`]: size,
+    [`${prefix}--accordion--flush`]: isFlush && align !== 'start',
   });
   return (
     <ul className={className} {...rest}>
-      {children}
+      {disabled
+        ? React.Children.toArray(children).map((child) => {
+            return React.cloneElement(child, { disabled });
+          })
+        : children}
     </ul>
   );
 }
-
-Accordion.defaultProps = {
-  align: 'end',
-};
 
 Accordion.propTypes = {
   /**
@@ -42,6 +52,23 @@ Accordion.propTypes = {
    * Specify an optional className to be applied to the container node
    */
   className: PropTypes.string,
+
+  /**
+   * Specify whether an individual AccordionItem should be disabled
+   */
+  disabled: PropTypes.bool,
+
+  /**
+   * Specify whether Accordion text should be flush, default is false, does not work with align="start"
+   */
+  isFlush: PropTypes.bool,
+
+  /**
+   * Specify the size of the Accordion. Currently supports the following:
+   */
+  size: FeatureFlags.enabled('enable-v11-release')
+    ? PropTypes.oneOf(['sm', 'md', 'lg'])
+    : PropTypes.oneOf(['sm', 'md', 'lg', 'xl']),
 };
 
 export default Accordion;

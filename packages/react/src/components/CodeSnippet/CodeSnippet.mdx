@@ -1,12 +1,14 @@
-import { Story, Props, Source, Preview } from '@storybook/addon-docs/blocks';
+import { Story, Props, Source, Preview } from '@storybook/addon-docs';
 import { withKnobs, boolean, select, text } from '@storybook/addon-knobs';
-import * as stories from './CodeSnippet-story.js';
 import CodeSnippet from '../CodeSnippet';
 
-<!-- How do I get <Props> to work?
- -->
-
 # CodeSnippet
+
+[Source code](https://github.com/carbon-design-system/carbon/tree/main/packages/react/src/components/CodeSnippet)
+&nbsp;|&nbsp;
+[Usage guidelines](https://www.carbondesignsystem.com/components/code-snippet/usage)
+&nbsp;|&nbsp;
+[Accessibility](https://www.carbondesignsystem.com/components/code-snippet/accessibility)
 
 ## Table of Contents
 
@@ -26,7 +28,7 @@ don't provide the copy functionality and recommend
 [clipboard.js](https://clipboardjs.com/).
 
 <Preview>
-  <Story id="codesnippet--inline" />
+  <Story id="components-codesnippet--inline" />
 </Preview>
 
 ## Skeleton state
@@ -36,7 +38,7 @@ an code snippet. This is useful to display while content in your code snippet is
 being fetched from an external resource like an API.
 
 <Preview>
-  <Story id="codesnippet--skeleton" />
+  <Story id="components-codesnippet--skeleton" />
 </Preview>
 
 ## Inline
@@ -45,17 +47,18 @@ Inline code snippet's are used for distinguishing a symbol, variable, function
 name or similar small piece of code from it's surrounding text.
 
 <Preview>
-  <Story id="codesnippet--inline" />
+  <Story id="components-codesnippet--inline" />
 </Preview>
 
 ## Multi-line
 
 Multiple line code snippets are used for displaying code with more than one
 line. They're shown in a block and useful for showing classes, functions, blocks
-of styles and the like.
+of styles and the like. There is an option to wrap the lines displayed if the
+lines are longer than the container.
 
 <Preview>
-  <Story id="codesnippet--multiline" />
+  <Story id="components-codesnippet--multiline" />
 </Preview>
 
 ## Single-line
@@ -65,14 +68,19 @@ without wrapping. Useful for calling out terminal commands, function
 invocations, expressions etc.
 
 <Preview>
-  <Story id="codesnippet--singleline" />
+  <Story id="components-codesnippet--singleline" />
 </Preview>
 
 ## Component API
 
-<Props sort="asc" />
+<Props />
+
+## Migration notes
+
+- `copyLabel` has been deprecated in favor of `ariaLabel`.
 
 ## Feedback
 
-Help us improve these docs by
-[editing this file on GitHub](https://github.com/carbon-design-system/carbon/edit/master/packages/react/src/components/CodeSnippet/CodeSnippet.stories.mdx)
+Help us improve this component by providing feedback, asking questions on Slack,
+or updating this file on
+[GitHub](https://github.com/carbon-design-system/carbon/edit/main/packages/react/src/components/CodeSnippet/CodeSnippet.mdx)

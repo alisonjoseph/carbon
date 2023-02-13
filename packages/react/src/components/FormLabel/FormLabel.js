@@ -7,20 +7,27 @@
 
 import PropTypes from 'prop-types';
 import React from 'react';
-import classnames from 'classnames';
-import { settings } from 'carbon-components';
+import cx from 'classnames';
+import { usePrefix } from '../../internal/usePrefix';
+import * as FeatureFlags from '@carbon/feature-flags';
 
-const { prefix } = settings;
-
-const FormLabel = ({ className, children, id, ...other }) => {
-  const classNames = classnames(`${prefix}--label`, className);
+function FormLabel({ className: customClassName, children, id, ...rest }) {
+  const prefix = usePrefix();
+  const className = cx(
+    `${prefix}--label`,
+    {
+      [`${prefix}--label--no-margin`]:
+        FeatureFlags.enabled('enable-v11-release'),
+    },
+    customClassName
+  );
 
   return (
-    <label htmlFor={id} className={classNames} {...other}>
+    <label htmlFor={id} className={className} {...rest}>
       {children}
     </label>
   );
-};
+}
 
 FormLabel.propTypes = {
   /**

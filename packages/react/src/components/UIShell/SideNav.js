@@ -4,16 +4,14 @@
  * This source code is licensed under the Apache-2.0 license found in the
  * LICENSE file in the root directory of this source tree.
  */
-
 import React, { useState, useRef } from 'react';
-import { settings } from 'carbon-components';
 import cx from 'classnames';
 import PropTypes from 'prop-types';
 import { AriaLabelPropType } from '../../prop-types/AriaPropTypes';
+import { CARBON_SIDENAV_ITEMS } from './_utils';
+import { usePrefix } from '../../internal/usePrefix';
 // TO-DO: comment back in when footer is added for rails
 // import SideNavFooter from './SideNavFooter';
-
-const { prefix } = settings;
 
 const SideNav = React.forwardRef(function SideNav(props, ref) {
   const {
@@ -32,13 +30,15 @@ const SideNav = React.forwardRef(function SideNav(props, ref) {
     isPersistent,
     addFocusListeners,
     addMouseListeners,
+    onOverlayClick,
+    ...other
   } = props;
 
+  const prefix = usePrefix();
   const { current: controlled } = useRef(expandedProp !== undefined);
   const [expandedState, setExpandedState] = useState(defaultExpanded);
-  const [expandedViaHoverState, setExpandedViaHoverState] = useState(
-    defaultExpanded
-  );
+  const [expandedViaHoverState, setExpandedViaHoverState] =
+    useState(defaultExpanded);
   const expanded = controlled ? expandedProp : expandedState;
   const handleToggle = (event, value = !expanded) => {
     if (!controlled) {
@@ -74,7 +74,7 @@ const SideNav = React.forwardRef(function SideNav(props, ref) {
 
   const overlayClassName = cx({
     [`${prefix}--side-nav__overlay`]: true,
-    [`${prefix}--side-nav__overlay-active`]: expanded,
+    [`${prefix}--side-nav__overlay-active`]: expanded || expandedViaHoverState,
   });
 
   let childrenToRender = children;
@@ -86,8 +86,15 @@ const SideNav = React.forwardRef(function SideNav(props, ref) {
       let currentExpansionState = controlled
         ? expandedViaHoverState || expanded
         : expanded;
+      // avoid spreading `isSideNavExpanded` to non-Carbon UI Shell children
       return React.cloneElement(child, {
-        isSideNavExpanded: currentExpansionState,
+        ...(CARBON_SIDENAV_ITEMS.includes(
+          child.type?.displayName ?? child.type?.name
+        )
+          ? {
+              isSideNavExpanded: currentExpansionState,
+            }
+          : {}),
       });
     });
   }
@@ -114,26 +121,32 @@ const SideNav = React.forwardRef(function SideNav(props, ref) {
 
   return (
     <>
-      {isFixedNav ? null : <div className={overlayClassName} />}
+      {isFixedNav ? null : (
+        // eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions
+        <div className={overlayClassName} onClick={onOverlayClick} />
+      )}
       <nav
         ref={ref}
         className={`${prefix}--side-nav__navigation ${className}`}
         {...accessibilityLabel}
-        {...eventHandlers}>
+        {...eventHandlers}
+        {...other}>
         {childrenToRender}
       </nav>
     </>
   );
 });
 
+SideNav.displayName = 'SideNav';
 SideNav.defaultProps = {
-  translateById: (id) => {
-    const translations = {
-      'carbon.sidenav.state.open': 'Close',
-      'carbon.sidenav.state.closed': 'Open',
-    };
-    return translations[id];
-  },
+  // TO-DO: comment back in when footer is added for rails
+  // translateById: (id) => {
+  //   const translations = {
+  //     'carbon.sidenav.state.open': 'Close',
+  //     'carbon.sidenav.state.closed': 'Open',
+  //   };
+  //   return translations[id];
+  // },
   defaultExpanded: false,
   isChildOfHeader: true,
   isFixedNav: false,
@@ -159,7 +172,7 @@ SideNav.propTypes = {
   addMouseListeners: PropTypes.bool,
 
   /**
-   * Optionally provide a custom class to apply to the underlying <li> node
+   * Optionally provide a custom class to apply to the underlying `<li>` node
    */
   className: PropTypes.string,
 
@@ -175,7 +188,7 @@ SideNav.propTypes = {
   expanded: PropTypes.bool,
 
   /**
-   * Optionally provide a custom class to apply to the underlying <li> node
+   * Optionally provide a custom class to apply to the underlying `<li>` node
    */
   isChildOfHeader: PropTypes.bool,
 
@@ -195,6 +208,13 @@ SideNav.propTypes = {
   isRail: PropTypes.bool,
 
   /**
+   * An optional listener that is called when the SideNav overlay is clicked
+   *
+   * @param {object} event
+   */
+  onOverlayClick: PropTypes.func,
+
+  /**
    * An optional listener that is called when an event that would cause
    * toggling the SideNav occurs.
    *
@@ -209,7 +229,7 @@ SideNav.propTypes = {
    * state of the component. From this, you should return a string representing
    * the label you want displayed or read by screen readers.
    */
-  translateById: PropTypes.func,
+  // translateById: PropTypes.func,
 };
 
 export default SideNav;

@@ -11,7 +11,7 @@ const { builders } = require('@carbon/icon-build-helpers');
 const metadata = require('@carbon/icons/metadata.json');
 
 async function build() {
-  await builders.react.run(metadata, {
+  await builders.reactNext.run(metadata, {
     output: process.cwd(),
   });
 }

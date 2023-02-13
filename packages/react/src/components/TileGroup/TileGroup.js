@@ -8,16 +8,16 @@
 import PropTypes from 'prop-types';
 import React from 'react';
 import RadioTile from '../RadioTile';
-import warning from 'warning';
-import { settings } from 'carbon-components';
-
-const { prefix } = settings;
+import { warning } from '../../internal/warning';
+import { PrefixContext } from '../../internal/usePrefix';
 
 export default class TileGroup extends React.Component {
   state = {
     selected: this.props.valueSelected || this.props.defaultSelected || null,
     prevValueSelected: this.props.valueSelected,
   };
+
+  static contextType = PrefixContext;
 
   static propTypes = {
     /**
@@ -46,7 +46,7 @@ export default class TileGroup extends React.Component {
     legend: PropTypes.string,
 
     /**
-     * Specify the name of the underlying <input> nodes
+     * Specify the name of the underlying `<input>` nodes
      */
     name: PropTypes.string.isRequired,
 
@@ -113,11 +113,12 @@ export default class TileGroup extends React.Component {
 
   renderLegend = (legend) => {
     if (legend) {
-      return <legend>{legend}</legend>;
+      return <legend className={`${this.context}--label`}>{legend}</legend>;
     }
   };
 
   render() {
+    const { context: prefix } = this;
     const {
       disabled,
       className = `${prefix}--tile-group`,

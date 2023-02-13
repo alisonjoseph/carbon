@@ -5,419 +5,446 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-import React from 'react';
-import DatePicker from '../DatePicker';
-import DatePickerSkeleton from '../DatePicker/DatePicker.Skeleton';
-import { mount, shallow } from 'enzyme';
-import DatePickerInput from '../DatePickerInput/DatePickerInput';
-import { settings } from 'carbon-components';
-
-const { prefix } = settings;
+import React, { useState } from 'react';
+import DatePicker from './DatePicker';
+import DatePickerInput from '../DatePickerInput';
+import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 
 describe('DatePicker', () => {
-  describe('Renders as expected', () => {
-    const wrapper = mount(
-      <DatePicker onChange={() => {}} className="extra-class">
-        <div className="test-child" />
-        <div className="test-child" />
-      </DatePicker>
-    );
-    const datepicker = wrapper.childAt(0);
-
-    it('has the expected classes', () => {
-      expect(datepicker.children().hasClass(`${prefix}--date-picker`)).toBe(
-        true
-      );
-    });
-
-    it('should add extra classes that are passed via className', () => {
-      expect(datepicker.children().hasClass('extra-class')).toBe(true);
-    });
-
-    it('should add the date picker type as expected', () => {
-      expect(wrapper.props().datePickerType).toEqual(undefined);
-      wrapper.setProps({ datePickerType: 'simple' });
-      expect(wrapper.props().datePickerType).toEqual('simple');
-    });
-
-    it('should specify short date picker as expected', () => {
-      expect(wrapper.props().short).toEqual(false);
-      wrapper.setProps({ short: true });
-      expect(wrapper.props().short).toEqual(true);
-    });
-
-    it('should specify light date picker as expected', () => {
-      expect(wrapper.props().light).toEqual(false);
-      wrapper.setProps({ light: true });
-      expect(wrapper.props().light).toEqual(true);
-    });
-
-    it('should add the date format as expected', () => {
-      expect(wrapper.props().dateFormat).toEqual('m/d/Y');
-      wrapper.setProps({ dateFormat: 'd/m/Y' });
-      expect(wrapper.props().dateFormat).toEqual('d/m/Y');
-    });
-
-    it('has the value as expected', () => {
-      expect(wrapper.props().value).toEqual(undefined);
-      wrapper.setProps({ value: '11/08/2017' });
-      expect(wrapper.props().value).toEqual('11/08/2017');
-    });
-
-    it('should render the children as expected', () => {
-      expect(wrapper.props().children.length).toEqual(2);
-    });
-  });
-
-  describe('Simple date picker', () => {
-    const wrapper = mount(
-      <DatePicker datePickerType="simple" className="extra-class">
-        <div className="test-child" />
-      </DatePicker>
-    );
-    const datepicker = wrapper.childAt(0);
-
-    it('has the simple date picker class', () => {
-      expect(
-        datepicker.children().hasClass(`${prefix}--date-picker--simple`)
-      ).toBe(true);
-    });
-
-    it('has the value as expected', () => {
-      expect(wrapper.props().value).toEqual(undefined);
-      wrapper.setProps({ value: '11/08/2017' });
-      expect(wrapper.props().value).toEqual('11/08/2017');
-    });
-
-    it('should not initalize a calendar', () => {
-      expect(wrapper.cal).toEqual(undefined);
-    });
-  });
-
-  describe('Single date picker', () => {
-    const wrapper = mount(
+  it('should add extra classes that are passed via className', () => {
+    render(
       <DatePicker
         onChange={() => {}}
-        datePickerType="single"
-        className="extra-class">
-        <div className="test-child">
-          <input type="text" className={`${prefix}--date-picker__input`} />
-        </div>
-      </DatePicker>
-    );
-    const datepicker = wrapper.childAt(0);
-    const input = wrapper.find(`.${prefix}--date-picker__input`);
-    const icon = wrapper.find('svg');
-
-    it('has the single date picker class', () => {
-      expect(
-        datepicker.children().hasClass(`${prefix}--date-picker--single`)
-      ).toBe(true);
-    });
-
-    it('should initalize a calendar', () => {
-      expect(wrapper.instance().cal).toBeDefined();
-    });
-
-    it('should update the classnames', () => {
-      expect(
-        wrapper
-          .instance()
-          .cal.calendarContainer.classList.contains(
-            `${prefix}--date-picker__calendar`
-          )
-      ).toBe(true);
-    });
-
-    it('has the value as expected', () => {
-      expect(wrapper.props().value).toEqual(undefined);
-      wrapper.setProps({ value: '11/08/2017' });
-      expect(wrapper.props().value).toEqual('11/08/2017');
-    });
-
-    it('should not render an icon', () => {
-      expect(icon.length).toEqual(0);
-    });
-  });
-
-  describe('Single date picker with initial value', () => {
-    const wrapper = mount(
-      <DatePicker
-        datePickerType="single"
+        className="custom-class"
         dateFormat="m/d/Y"
-        value={'02/26/2017'}
-        appendTo={document.body.firstChild}
-        onChange={() => {}}>
+        data-testid="datePicker-1">
         <DatePickerInput
-          key="label"
-          labelText="Controlled Date"
-          id="date-picker-input-id"
+          id="date-picker-input-id-start"
+          placeholder="mm/dd/yyyy"
+          labelText="Start date"
+        />
+        <DatePickerInput
+          id="date-picker-input-id-finish"
+          placeholder="mm/dd/yyyy"
+          labelText="End date"
         />
       </DatePicker>
     );
 
-    it('has the value as expected', () => {
-      // MOUNT
-      expect(wrapper.props().value).toEqual('02/26/2017');
-
-      // UPDATE
-      wrapper.setProps({ value: '02/17/2017' });
-      expect(wrapper.props().value).toEqual('02/17/2017');
-    });
-
-    it('sends appendTo to Flatpickr', () => {
-      expect(wrapper.instance().cal.config.appendTo).toBe(
-        document.body.firstChild
-      );
-    });
+    expect(screen.getByTestId('datePicker-1')).toHaveClass('custom-class');
   });
 
-  describe('Range date picker', () => {
-    const wrapper = mount(
+  it('should add the correct class when type "simple" is passed as a prop', () => {
+    render(
       <DatePicker
         onChange={() => {}}
-        datePickerType="range"
-        className="extra-class">
-        <div className="test-child">
-          <input
-            type="text"
-            className={`${prefix}--date-picker__input`}
-            id="input-from"
-          />
-        </div>
-        <div className="test-child">
-          <input
-            type="text"
-            className={`${prefix}--date-picker__input`}
-            id="input-to"
-          />
-        </div>
-      </DatePicker>
-    );
-    const datepicker = wrapper.childAt(0);
-
-    it('has the range date picker class', () => {
-      expect(
-        datepicker.children().hasClass(`${prefix}--date-picker--range`)
-      ).toBe(true);
-    });
-
-    it('should initalize a calendar', () => {
-      expect(wrapper.instance().cal).toBeDefined();
-    });
-
-    it('should update the classnames', () => {
-      expect(
-        wrapper
-          .instance()
-          .cal.calendarContainer.classList.contains(
-            `${prefix}--date-picker__calendar`
-          )
-      ).toBe(true);
-    });
-
-    it('has the value as expected', () => {
-      expect(wrapper.props().value).toEqual(undefined);
-      wrapper.setProps({ value: '11/08/2017' });
-      expect(wrapper.props().value).toEqual('11/08/2017');
-    });
-  });
-
-  describe('Date picker with locale', () => {
-    const wrapper = mount(
-      <DatePicker
-        onChange={() => {}}
-        datePickerType="range"
-        className="extra-class"
-        locale="es">
-        <div className="test-child">
-          <input
-            type="text"
-            className={`${prefix}--date-picker__input`}
-            id="input-from"
-          />
-        </div>
-        <div className="test-child">
-          <input
-            type="text"
-            className={`${prefix}--date-picker__input`}
-            id="input-to"
-          />
-        </div>
+        dateFormat="m/d/Y"
+        datePickerType="simple">
+        <DatePickerInput
+          id="date-picker-input-id-start"
+          placeholder="mm/dd/yyyy"
+          labelText="Start date"
+        />
       </DatePicker>
     );
 
-    const wrapperNoLocale = mount(
+    expect(
+      document.querySelector('.cds--date-picker--simple')
+    ).toBeInTheDocument();
+  });
+
+  it('should add the correct class when type "single" is passed as a prop', () => {
+    render(
       <DatePicker
         onChange={() => {}}
-        datePickerType="range"
-        className="extra-class">
-        <div className="test-child">
-          <input
-            type="text"
-            className={`${prefix}--date-picker__input`}
-            id="input-from"
-          />
-        </div>
-        <div className="test-child">
-          <input
-            type="text"
-            className={`${prefix}--date-picker__input`}
-            id="input-to"
-          />
-        </div>
+        dateFormat="m/d/Y"
+        datePickerType="single">
+        <DatePickerInput
+          id="date-picker-input-id-start"
+          placeholder="mm/dd/yyyy"
+          labelText="Start date"
+        />
       </DatePicker>
     );
 
-    it('has the range date picker locale', () => {
-      const datepicker = wrapper.find('DatePicker');
-      expect(datepicker.props().locale).toBe('es');
-    });
-
-    it('has the range date picker without locale defined', () => {
-      const datepicker = wrapperNoLocale.find('DatePicker');
-      expect(datepicker.props().locale).toBe('en');
-    });
+    expect(
+      document.querySelector('.cds--date-picker--single')
+    ).toBeInTheDocument();
   });
 
-  describe('Date picker can be used with enzyme shallow', () => {
-    let spy;
-    beforeEach((done) => {
-      spy = {};
-      spy.console = jest.spyOn(console, 'error').mockImplementation((e) => {
-        done(e);
-      });
-      done();
-    });
+  it('should add the correct class when type "range" is passed as a prop', () => {
+    render(
+      <DatePicker onChange={() => {}} dateFormat="m/d/Y" datePickerType="range">
+        <DatePickerInput
+          id="date-picker-input-id-start"
+          placeholder="mm/dd/yyyy"
+          labelText="Start date"
+        />
+        <DatePickerInput
+          id="date-picker-input-id-finish"
+          placeholder="mm/dd/yyyy"
+          labelText="End date"
+        />
+      </DatePicker>
+    );
 
-    afterEach(() => {
-      spy.console.mockRestore();
-    });
+    expect(
+      document.querySelector('.cds--date-picker--range')
+    ).toBeInTheDocument();
+  });
 
-    it('date picker should not throw exception when mounted or unmounted', () => {
-      const wrapper = shallow(
-        <DatePicker
-          onChange={() => {}}
-          datePickerType="range"
-          className="extra-class"
-          locale="es">
-          <div className="test-child">
-            <input
-              type="text"
-              className={`${prefix}--date-picker__input`}
-              id="input-from"
+  it('should render the children as expected', () => {
+    render(
+      <DatePicker onChange={() => {}} dateFormat="m/d/Y" datePickerType="range">
+        <DatePickerInput
+          id="date-picker-input-id-start"
+          placeholder="mm/dd/yyyy"
+          labelText="Start date"
+        />
+        <DatePickerInput
+          id="date-picker-input-id-finish"
+          placeholder="mm/dd/yyyy"
+          labelText="End date"
+        />
+      </DatePicker>
+    );
+
+    expect(screen.getByLabelText('Start date')).toBeInTheDocument();
+    expect(screen.getByLabelText('End date')).toBeInTheDocument();
+  });
+
+  it('should add the date format as expected', () => {
+    render(
+      <DatePicker
+        onChange={() => {}}
+        datePickerType="single"
+        value="01/01/2022"
+        dateFormat="Y/m/d">
+        <DatePickerInput
+          id="date-picker-input-id"
+          placeholder="yyyy/mm/dd"
+          labelText="Date Picker label"
+        />
+      </DatePicker>
+    );
+    expect(screen.getByLabelText('Date Picker label')).toHaveValue(
+      '2022/01/01'
+    );
+  });
+
+  it('has the value as expected', () => {
+    render(
+      <DatePicker
+        onChange={() => {}}
+        datePickerType="single"
+        value="01/03/2018">
+        <DatePickerInput
+          id="date-picker-input-id-start"
+          placeholder="mm/dd/yyyy"
+          labelText="Date Picker label"
+          data-testid="input-value"
+        />
+      </DatePicker>
+    );
+    expect(screen.getByLabelText('Date Picker label')).toHaveValue(
+      '01/03/2018'
+    );
+  });
+
+  it('should accept a `ref` for the outermost element', () => {
+    const ref = jest.fn();
+    const { container } = render(<DatePicker ref={ref} />);
+
+    expect(ref).toHaveBeenCalledWith(container.firstChild);
+  });
+});
+
+describe('Simple date picker', () => {
+  it('should not initialize a calendar', () => {
+    render(
+      <DatePicker
+        onChange={() => {}}
+        dateFormat="m/d/Y"
+        datePickerType="simple">
+        <DatePickerInput
+          id="date-picker-input-id-start"
+          placeholder="mm/dd/yyyy"
+          labelText="Start date"
+        />
+      </DatePicker>
+    );
+
+    expect(screen.queryByRole('application')).not.toBeInTheDocument();
+  });
+
+  it('should initialize a calendar when using react.lazy', async () => {
+    const LazyDatePicker = React.lazy(() =>
+      import('carbon-components-react').then((module) => ({
+        default: module.DatePicker,
+      }))
+    );
+
+    const LazyDatePickerInput = React.lazy(() =>
+      import('carbon-components-react').then((module) => ({
+        default: module.DatePickerInput,
+      }))
+    );
+
+    render(
+      <React.Suspense fallback="Loading">
+        <LazyDatePicker datePickerType="single">
+          <LazyDatePickerInput
+            placeholder="mm/dd/yyyy"
+            labelText="Date Picker label"
+            id="date-picker-simple"
+          />
+        </LazyDatePicker>
+      </React.Suspense>
+    );
+
+    expect(
+      await screen.findByLabelText('Date Picker label')
+    ).toBeInTheDocument();
+
+    const input = document.querySelector('.cds--date-picker__input');
+
+    expect(screen.getByRole('application')).not.toHaveClass('open');
+    userEvent.click(input);
+    expect(screen.getByRole('application')).toHaveClass('open');
+  });
+});
+
+describe('Single date picker', () => {
+  it('should initialize a calendar', () => {
+    render(
+      <DatePicker
+        onChange={() => {}}
+        dateFormat="m/d/Y"
+        datePickerType="single">
+        <DatePickerInput
+          id="date-picker-input-id-start"
+          placeholder="mm/dd/yyyy"
+          labelText="Start date"
+        />
+      </DatePicker>
+    );
+    expect(screen.getByRole('application')).toBeInTheDocument();
+  });
+
+  it('should update the calendar classnames when open', () => {
+    render(
+      <DatePicker
+        onChange={() => {}}
+        dateFormat="m/d/Y"
+        datePickerType="single">
+        <DatePickerInput
+          id="date-picker-input-id-start"
+          placeholder="mm/dd/yyyy"
+          labelText="Start date"
+        />
+      </DatePicker>
+    );
+
+    const input = document.querySelector('.cds--date-picker__input');
+
+    expect(screen.getByRole('application')).not.toHaveClass('open');
+    userEvent.click(input);
+    expect(screen.getByRole('application')).toHaveClass('open');
+  });
+
+  it('should support controlled value', () => {
+    const DatePickerExample = () => {
+      const [date, setDate] = useState('');
+      return (
+        <>
+          <DatePicker
+            datePickerType="single"
+            value={date}
+            onChange={(value) => {
+              setDate(value);
+            }}>
+            <DatePickerInput
+              placeholder="mm/dd/yyyy"
+              labelText="Date Picker label"
+              id="date-picker-simple"
             />
-          </div>
-          <div className="test-child">
-            <input
-              type="text"
-              className={`${prefix}--date-picker__input`}
-              id="input-to"
-            />
-          </div>
-        </DatePicker>
+          </DatePicker>
+          <button
+            type="button"
+            onClick={() => {
+              setDate('');
+            }}>
+            clear
+          </button>
+        </>
       );
-      expect(wrapper.find('DatePicker')).toBeDefined();
-      wrapper.unmount();
-    });
+    };
+
+    render(<DatePickerExample />);
+    expect(screen.getByLabelText('Date Picker label')).toHaveValue('');
+
+    userEvent.type(
+      screen.getByLabelText('Date Picker label'),
+      '01/20/1989{enter}'
+    );
+    expect(screen.getByLabelText('Date Picker label')).toHaveValue(
+      '01/20/1989'
+    );
+
+    userEvent.click(screen.getByText('clear'));
+    expect(screen.getByLabelText('Date Picker label')).toHaveValue('');
+  });
+});
+
+describe('Date picker with locale', () => {
+  it('sets the locale when it is passed as a prop', () => {
+    render(
+      <DatePicker
+        onChange={() => {}}
+        datePickerType="single"
+        locale="es"
+        value="01/01/2022">
+        <DatePickerInput
+          id="date-picker-input-id"
+          placeholder="mm/dd/yyyy"
+          labelText="Date picker label"
+        />
+      </DatePicker>
+    );
+    expect(screen.getByText('Enero')).toBeInTheDocument();
   });
 
-  describe('Date picker with minDate and maxDate', () => {
-    let mockConsoleError;
+  it('should use default locale if one is not passed as a prop', () => {
+    render(
+      <DatePicker
+        onChange={() => {}}
+        datePickerType="single"
+        value="01/01/2022">
+        <DatePickerInput
+          id="date-picker-input-id"
+          placeholder="mm/dd/yyyy"
+          labelText="Date picker label"
+        />
+      </DatePicker>
+    );
+    expect(screen.getByText('January')).toBeInTheDocument();
+  });
+});
 
-    beforeEach(() => {
-      mockConsoleError = jest.spyOn(console, 'error');
-    });
+describe('Date picker with minDate and maxDate', () => {
+  it('should respect minDate', () => {
+    render(
+      <DatePicker
+        onChange={() => {}}
+        datePickerType="single"
+        minDate="01/01/2018"
+        maxDate="01/03/2018"
+        value="01/01/2018">
+        <DatePickerInput
+          id="date-picker-input-id-start"
+          placeholder="mm/dd/yyyy"
+          labelText="Date Picker label"
+          data-testid="input-min-max"
+        />
+      </DatePicker>
+    );
+    const belowMinDate = document.querySelector(
+      '[aria-label="December 31, 2017"]'
+    );
+    userEvent.click(screen.getByTestId('input-min-max'));
+    userEvent.click(belowMinDate);
+    expect(screen.getByLabelText('Date Picker label')).toHaveValue(
+      '01/01/2018'
+    );
+  });
 
-    afterEach(() => {
-      mockConsoleError.mockRestore();
-    });
+  it('should respect maxDate', () => {
+    render(
+      <DatePicker
+        onChange={() => {}}
+        datePickerType="single"
+        minDate="01/01/2018"
+        maxDate="01/03/2018"
+        value="01/01/2018">
+        <DatePickerInput
+          id="date-picker-input-id-start"
+          placeholder="mm/dd/yyyy"
+          labelText="Date Picker label"
+          data-testid="input-min-max-2"
+        />
+      </DatePicker>
+    );
 
-    const wrapper = mount(
+    const aboveMaxDate = document.querySelector(
+      '[aria-label="January 4, 2018"]'
+    );
+
+    userEvent.click(screen.getByTestId('input-min-max-2'));
+    userEvent.click(aboveMaxDate);
+    expect(screen.getByLabelText('Date Picker label')).toHaveValue(
+      '01/01/2018'
+    );
+  });
+
+  it('should not have "console.error" being created', () => {
+    const mockConsoleError = jest.spyOn(console, 'error');
+    render(
       <DatePicker
         onChange={() => {}}
         datePickerType="range"
-        className="extra-class"
         minDate="01/01/2018"
         maxDate="01/30/2018">
-        <div className="test-child">
-          <input
-            type="text"
-            className={`${prefix}--date-picker__input`}
-            id="input-from"
-          />
-        </div>
-        <div className="test-child">
-          <input
-            type="text"
-            className={`${prefix}--date-picker__input`}
-            id="input-to"
-          />
-        </div>
+        <DatePickerInput
+          id="date-picker-input-id-start"
+          placeholder="mm/dd/yyyy"
+          labelText="Start date"
+        />
+        <DatePickerInput
+          id="date-picker-input-id-finish"
+          placeholder="mm/dd/yyyy"
+          labelText="End date"
+        />
       </DatePicker>
     );
 
-    it('has the range date picker with min and max dates', () => {
-      const datepicker = wrapper.find('DatePicker');
-      expect(datepicker.props().minDate).toBe('01/01/2018');
-      expect(datepicker.props().maxDate).toBe('01/30/2018');
-    });
-
-    it('should not have "console.error" being created', () => {
-      expect(mockConsoleError).not.toBeCalled();
-    });
+    expect(mockConsoleError).not.toHaveBeenCalled();
+    jest.restoreAllMocks();
   });
-});
 
-describe('DatePickerInput', () => {
-  it('should call `openCalendar` on calendar icon click', () => {
-    const mockOpenCalendar = jest.fn();
-    const wrapper = mount(
-      <DatePickerInput
-        labelText="Date Picker label"
-        id="input-from"
-        openCalendar={mockOpenCalendar}
-      />
+  it('should respect readOnly prop', () => {
+    const onChange = jest.fn();
+    const onClick = jest.fn();
+
+    render(
+      <DatePicker
+        dateFormat="m/d/Y"
+        onClick={onClick}
+        onChange={onChange}
+        datePickerType="range"
+        readOnly={true}>
+        <DatePickerInput
+          id="date-picker-input-id-start"
+          labelText="Start date"
+        />
+        <DatePickerInput
+          id="date-picker-input-id-finish"
+          labelText="End date"
+        />
+      </DatePicker>
     );
-    wrapper.find('svg').simulate('click');
-    expect(mockOpenCalendar).toHaveBeenCalled();
-  });
-});
 
-describe('DatePickerSkeleton', () => {
-  describe('Renders as expected', () => {
-    const wrapper = shallow(<DatePickerSkeleton range />);
+    // Click events should fire
+    const theStart = screen.getByLabelText('Start date');
+    userEvent.click(theStart);
+    expect(onClick).toHaveBeenCalledTimes(1);
+    const theEnd = screen.getByLabelText('End date');
+    userEvent.click(theEnd);
+    expect(onClick).toHaveBeenCalledTimes(2);
 
-    it('Has the expected classes', () => {
-      expect(wrapper.children().hasClass(`${prefix}--skeleton`)).toEqual(true);
-      expect(wrapper.children().hasClass(`${prefix}--date-picker`)).toEqual(
-        true
-      );
-      expect(
-        wrapper.children().hasClass(`${prefix}--date-picker--range`)
-      ).toEqual(true);
-    });
-  });
-});
+    userEvent.type(theStart, '01/01/2018{tab}'); // should not be possible to type
+    userEvent.type(theEnd, '02/02/2018{enter}'); // should not be possible to type
 
-describe('Opening up calendar dropdown', () => {
-  const wrapper = mount(
-    <DatePicker datePickerType="range" className="extra-class">
-      <DatePickerInput labelText="Date Picker label" id="input-from" />
-      <DatePickerInput labelText="Date Picker label" id="input-to" />
-    </DatePicker>
-  );
-
-  it('has the range date picker with min and max dates', () => {
-    const datePicker = wrapper.instance();
-    const input = wrapper.find('input').at(0);
-
-    jest.spyOn(datePicker.cal, 'open');
-
-    input
-      .getDOMNode()
-      .dispatchEvent(new window.KeyboardEvent('keydown', { key: 'ArrowDown' }));
-
-    expect(datePicker.cal.open).toHaveBeenCalled();
+    expect(onChange).toHaveBeenCalledTimes(0);
   });
 });

@@ -15,6 +15,11 @@ import { uploadFiles } from '../test-helpers';
 describe('FileUploaderDropContainer', () => {
   afterEach(cleanup);
 
+  it('should not have axe violations', async () => {
+    const { container } = render(<FileUploaderDropContainer />);
+    await expect(container).toHaveNoAxeViolations();
+  });
+
   it('should support a custom class name on the drop area', () => {
     const { container } = render(
       <FileUploaderDropContainer className="test" />
@@ -80,6 +85,132 @@ describe('FileUploaderDropContainer', () => {
         },
       }),
       { addedFiles: files }
+    );
+  });
+
+  it('should mark invalid files using default pattern', () => {
+    const onAddFiles = jest.fn();
+    const { container } = render(
+      <FileUploaderDropContainer onAddFiles={onAddFiles} accept={['.txt']} />
+    );
+    const input = container.querySelector('input');
+
+    const files = [
+      new File(['foo'], 'foo.txt', { type: 'text/plain' }),
+      new File(['bar'], 'bar.a_a', { type: 'text/plain' }),
+      new File(['bar_foo'], 'bar_foo.b-b', { type: 'text/plain' }),
+      new File(['bar-foo'], 'bar-foo.a-b_c', { type: 'text/plain' }),
+    ];
+
+    uploadFiles(input, files);
+
+    expect(onAddFiles).toHaveBeenCalledWith(
+      expect.objectContaining({
+        target: {
+          files,
+        },
+      }),
+      { addedFiles: files }
+    );
+
+    expect(onAddFiles).toHaveBeenCalledWith(
+      expect.objectContaining({
+        target: {
+          files,
+        },
+      }),
+      {
+        addedFiles: expect.arrayContaining([
+          expect.not.objectContaining({ invalidFileType: true }),
+          expect.objectContaining({ invalidFileType: true }),
+          expect.objectContaining({ invalidFileType: true }),
+          expect.objectContaining({ invalidFileType: true }),
+        ]),
+      }
+    );
+  });
+
+  it('should be case insensitive when marking files invalid', () => {
+    const onAddFiles = jest.fn();
+    const { container } = render(
+      <FileUploaderDropContainer onAddFiles={onAddFiles} accept={['.jpeg']} />
+    );
+    const input = container.querySelector('input');
+
+    const files = [
+      new File(['foo'], 'foo.JPEG', { type: 'image/jpeg' }),
+      new File(['bar'], 'bar.a_a', { type: 'text/plain' }),
+    ];
+
+    uploadFiles(input, files);
+
+    expect(onAddFiles).toHaveBeenCalledWith(
+      expect.objectContaining({
+        target: {
+          files,
+        },
+      }),
+      { addedFiles: files }
+    );
+
+    expect(onAddFiles).toHaveBeenCalledWith(
+      expect.objectContaining({
+        target: {
+          files,
+        },
+      }),
+      {
+        addedFiles: expect.arrayContaining([
+          expect.not.objectContaining({ invalidFileType: false }),
+          expect.objectContaining({ invalidFileType: true }),
+        ]),
+      }
+    );
+  });
+
+  it('should not mark any invalid files using custom pattern', () => {
+    const onAddFiles = jest.fn();
+    const { container } = render(
+      <FileUploaderDropContainer
+        onAddFiles={onAddFiles}
+        accept={['.txt', '.a_a', '.b-b', '.a-b_c']}
+        pattern=".[0-9a-z-_]+$"
+      />
+    );
+    const input = container.querySelector('input');
+
+    const files = [
+      new File(['foo'], 'foo.txt', { type: 'text/plain' }),
+      new File(['bar'], 'bar.a_a', { type: 'text/plain' }),
+      new File(['bar_foo'], 'bar_foo.b-b', { type: 'text/plain' }),
+      new File(['bar-foo'], 'bar-foo.a-b_c', { type: 'text/plain' }),
+    ];
+
+    uploadFiles(input, files);
+
+    expect(onAddFiles).toHaveBeenCalledWith(
+      expect.objectContaining({
+        target: {
+          files,
+        },
+      }),
+      { addedFiles: files }
+    );
+
+    expect(onAddFiles).toHaveBeenCalledWith(
+      expect.objectContaining({
+        target: {
+          files,
+        },
+      }),
+      {
+        addedFiles: expect.arrayContaining([
+          expect.not.objectContaining({ invalidFileType: true }),
+          expect.not.objectContaining({ invalidFileType: true }),
+          expect.not.objectContaining({ invalidFileType: true }),
+          expect.not.objectContaining({ invalidFileType: true }),
+        ]),
+      }
     );
   });
 });

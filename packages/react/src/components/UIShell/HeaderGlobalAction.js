@@ -5,13 +5,12 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-import { settings } from 'carbon-components';
 import cx from 'classnames';
 import React from 'react';
 import PropTypes from 'prop-types';
 import { AriaLabelPropType } from '../../prop-types/AriaPropTypes';
-
-const { prefix } = settings;
+import Button from '../Button';
+import { usePrefix } from '../../internal/usePrefix';
 
 /**
  * HeaderGlobalAction is used as a part of the `HeaderGlobalBar`. It is
@@ -29,10 +28,12 @@ const HeaderGlobalAction = React.forwardRef(function HeaderGlobalAction(
     className: customClassName,
     onClick,
     isActive,
+    tooltipAlignment,
     ...rest
   },
   ref
 ) {
+  const prefix = usePrefix();
   const className = cx({
     [customClassName]: !!customClassName,
     [`${prefix}--header__action`]: true,
@@ -43,15 +44,19 @@ const HeaderGlobalAction = React.forwardRef(function HeaderGlobalAction(
     'aria-labelledby': ariaLabelledBy,
   };
   return (
-    <button
+    <Button
       {...rest}
       {...accessibilityLabel}
       className={className}
       onClick={onClick}
       type="button"
+      hasIconOnly
+      iconDescription={ariaLabel}
+      tooltipPosition="bottom"
+      tooltipAlignment={tooltipAlignment}
       ref={ref}>
       {children}
-    </button>
+    </Button>
   );
 });
 
@@ -82,6 +87,12 @@ HeaderGlobalAction.propTypes = {
    * button fires it's onclick event
    */
   onClick: PropTypes.func,
+
+  /**
+   * Specify the alignment of the tooltip to the icon-only button.
+   * Can be one of: start, center, or end.
+   */
+  tooltipAlignment: PropTypes.oneOf(['start', 'center', 'end']),
 };
 
 HeaderGlobalAction.displayName = 'HeaderGlobalAction';

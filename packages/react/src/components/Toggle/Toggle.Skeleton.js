@@ -8,11 +8,9 @@
 import PropTypes from 'prop-types';
 import React from 'react';
 import cx from 'classnames';
-import { settings } from 'carbon-components';
+import { PrefixContext } from '../../internal/usePrefix';
 
-const { prefix } = settings;
-
-export default class ToggleSkeleton extends React.Component {
+class ToggleSkeleton extends React.Component {
   static propTypes = {
     ['aria-label']: PropTypes.string.isRequired,
 
@@ -21,7 +19,7 @@ export default class ToggleSkeleton extends React.Component {
      */
     className: PropTypes.string,
     /**
-     * Provide an id that unique represents the underlying <input>
+     * Provide an id that unique represents the underlying `<input>`
      */
     id: PropTypes.string,
 
@@ -32,35 +30,57 @@ export default class ToggleSkeleton extends React.Component {
      * provided
      */
     labelText: PropTypes.string,
+
+    /**
+     * Specify the size of the Toggle. Currently only supports 'sm' or 'md' (default)
+     */
+    size: PropTypes.oneOf(['sm', 'md']),
   };
 
   static defaultProps = {
     ['aria-label']: 'Toggle is loading',
+    size: 'md',
   };
 
   render() {
-    const { id, labelText, className, ...rest } = this.props;
+    const { id, labelText, className, size, ...rest } = this.props;
 
     return (
-      <div className={cx(`${prefix}--form-item`, className)} {...rest}>
-        <input
-          type="checkbox"
-          id={id}
-          className={`${prefix}--toggle ${prefix}--skeleton`}
-        />
+      <PrefixContext.Consumer>
+        {(prefix) => {
+          const toggleInputClassNames = cx(
+            `${prefix}--toggle ${prefix}--skeleton`,
+            {
+              [`${prefix}--toggle-input--small`]: size === 'sm',
+            }
+          );
 
-        <label
-          aria-label={labelText ? null : this.props['aria-label']}
-          className={`${prefix}--toggle__label ${prefix}--skeleton`}
-          htmlFor={id}>
-          {labelText && (
-            <span className={`${prefix}--toggle__label-text`}>{labelText}</span>
-          )}
-          <span className={`${prefix}--toggle__text--left`} />
-          <span className={`${prefix}--toggle__appearance`} />
-          <span className={`${prefix}--toggle__text--right`} />
-        </label>
-      </div>
+          return (
+            <div className={cx(`${prefix}--form-item`, className)} {...rest}>
+              <input
+                type="checkbox"
+                id={id}
+                className={toggleInputClassNames}
+              />
+
+              <label
+                className={`${prefix}--toggle-input__label`}
+                htmlFor={id}
+                aria-label={labelText ? null : this.props['aria-label']}>
+                {labelText ? <div>{labelText}</div> : null}
+                <span className={`${prefix}--toggle__switch`}>
+                  <span className={`${prefix}--toggle__text--left`} />
+                  <span className={`${prefix}--toggle__appearance`} />
+                  <span className={`${prefix}--toggle__text--right`} />
+                </span>
+              </label>
+            </div>
+          );
+        }}
+      </PrefixContext.Consumer>
     );
   }
 }
+
+export default ToggleSkeleton;
+export { ToggleSkeleton };

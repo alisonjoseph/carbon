@@ -8,12 +8,13 @@
 import PropTypes from 'prop-types';
 import React from 'react';
 import classNames from 'classnames';
-import { settings } from 'carbon-components';
-import TabContent from '../TabContent';
-
-const { prefix } = settings;
+import * as FeatureFlags from '@carbon/feature-flags';
+import deprecate from '../../prop-types/deprecate';
+import { PrefixContext } from '../../internal/usePrefix';
 
 export default class Tab extends React.Component {
+  static contextType = PrefixContext;
+
   static propTypes = {
     /**
      * Specify an optional className to be added to your Tab
@@ -40,7 +41,7 @@ export default class Tab extends React.Component {
     /**
      * Provide a string that represents the `href` of the Tab
      */
-    href: PropTypes.string.isRequired,
+    href: deprecate(PropTypes.string),
 
     /**
      * The element ID for the top-level element.
@@ -72,7 +73,8 @@ export default class Tab extends React.Component {
      * Useful for using Tab along with react-router or other client
      * side router libraries.
      **/
-    renderAnchor: PropTypes.func,
+    renderAnchor: deprecate(PropTypes.func),
+    renderButton: PropTypes.func,
 
     /*
      * An optional parameter to allow overriding the content rendering.
@@ -82,7 +84,7 @@ export default class Tab extends React.Component {
     /**
      * Provide an accessibility role for your Tab
      */
-    role: PropTypes.string.isRequired,
+    role: deprecate(PropTypes.string),
 
     /**
      * Whether your Tab is selected.
@@ -91,49 +93,58 @@ export default class Tab extends React.Component {
     selected: PropTypes.bool.isRequired,
 
     /**
-     * Specify the tab index of the <a> node
+     * Specify the tab index of the `<button>` node
      */
-    tabIndex: PropTypes.number.isRequired,
+    tabIndex: PropTypes.number,
   };
 
   static defaultProps = {
-    role: 'presentation',
-    label: 'provide a label',
-    tabIndex: 0,
-    href: '#',
+    label: FeatureFlags.enabled('enable-v11-release')
+      ? undefined
+      : 'provide a label',
     selected: false,
-    renderContent: TabContent,
     onClick: () => {},
     onKeyDown: () => {},
   };
 
   render() {
+    const { context: prefix } = this;
     const {
       id,
       className,
       handleTabClick,
       handleTabKeyDown,
       disabled,
-      href,
+      href = '#',
       index,
       label,
       selected,
-      tabIndex,
+      tabIndex = 0,
       onClick,
       onKeyDown,
       renderAnchor,
+      renderButton,
       renderContent, // eslint-disable-line no-unused-vars
+      role, // eslint-disable-line no-unused-vars
       ...other
     } = this.props;
 
-    const classes = classNames(className, `${prefix}--tabs__nav-item`, {
-      [`${prefix}--tabs__nav-item--disabled`]: disabled,
-      [`${prefix}--tabs__nav-item--selected`]: selected,
-    });
+    const classes = classNames(
+      className,
+      `${prefix}--tabs--scrollable__nav-item`,
+      {
+        [`${prefix}--tabs__nav-item--disabled`]: disabled,
+        [`${prefix}--tabs__nav-item--selected`]: selected,
+        [`${prefix}--tabs--scrollable__nav-item--disabled`]: disabled,
+        [`${prefix}--tabs--scrollable__nav-item--selected`]: selected,
+      }
+    );
 
-    const anchorProps = {
-      id,
-      className: `${prefix}--tabs__nav-link`,
+    const buttonProps = {
+      ['aria-selected']: selected,
+      ['aria-disabled']: disabled,
+      ['aria-controls']: id && `${id}__panel`,
+      className: `${prefix}--tabs--scrollable__nav-link`,
       href,
       tabIndex: !disabled ? tabIndex : -1,
       ref: (e) => {
@@ -141,33 +152,37 @@ export default class Tab extends React.Component {
       },
     };
 
+    const renderElement = renderButton || renderAnchor;
+
     return (
       <li
         {...other}
-        tabIndex={-1}
         className={classes}
         onClick={(evt) => {
           if (disabled) {
             return;
           }
-          handleTabClick(index, evt);
+          if (handleTabClick) {
+            handleTabClick(index, evt);
+          }
           onClick(evt);
         }}
         onKeyDown={(evt) => {
           if (disabled) {
             return;
           }
-          handleTabKeyDown(index, evt);
+          if (handleTabKeyDown) {
+            handleTabKeyDown(index, evt);
+          }
           onKeyDown(evt);
         }}
-        role="tab"
-        aria-selected={selected}
-        aria-disabled={disabled}
-        aria-controls={`${id}__panel`}>
-        {renderAnchor ? (
-          renderAnchor(anchorProps)
+        role="presentation">
+        {renderElement ? (
+          renderElement(buttonProps)
         ) : (
-          <a {...anchorProps}>{label}</a>
+          <button type="button" role="tab" {...buttonProps}>
+            {label}
+          </button>
         )}
       </li>
     );

@@ -6,7 +6,9 @@
  */
 
 import React from 'react';
-import { CheckmarkFilled16 } from '@carbon/icons-react';
+import { CheckmarkFilled } from '@carbon/icons-react';
+import { withKnobs, boolean } from '@storybook/addon-knobs';
+
 import {
   StructuredListWrapper,
   StructuredListHead,
@@ -14,24 +16,31 @@ import {
   StructuredListRow,
   StructuredListInput,
   StructuredListCell,
-} from '../StructuredList';
+} from './StructuredList';
 import StructuredListSkeleton from '../StructuredList/StructuredList.Skeleton';
-import { settings } from 'carbon-components';
+import mdx from './StructuredList.mdx';
 
-const { prefix } = settings;
+const prefix = 'cds';
+
+const props = () => ({
+  isCondensed: boolean('Condensed', false),
+  isFlush: boolean('Flush alignment', false),
+});
 
 export default {
-  title: 'StructuredList',
-
+  title: 'Components/StructuredList',
+  component: StructuredListWrapper,
+  decorators: [withKnobs],
+  subcomponents: {
+    StructuredListHead,
+    StructuredListBody,
+    StructuredListRow,
+    StructuredListInput,
+    StructuredListCell,
+  },
   parameters: {
-    component: StructuredListWrapper,
-
-    subcomponents: {
-      StructuredListHead,
-      StructuredListBody,
-      StructuredListRow,
-      StructuredListInput,
-      StructuredListCell,
+    docs: {
+      page: mdx,
     },
   },
 };
@@ -70,13 +79,39 @@ export const Simple = () => (
   </StructuredListWrapper>
 );
 
-Simple.parameters = {
-  info: {
-    text: `
-        Structured Lists group content that is similar or related, such as terms or definitions.
-      `,
-  },
-};
+export const Playground = () => (
+  <StructuredListWrapper {...props()}>
+    <StructuredListHead>
+      <StructuredListRow head>
+        <StructuredListCell head>ColumnA</StructuredListCell>
+        <StructuredListCell head>ColumnB</StructuredListCell>
+        <StructuredListCell head>ColumnC</StructuredListCell>
+      </StructuredListRow>
+    </StructuredListHead>
+    <StructuredListBody>
+      <StructuredListRow>
+        <StructuredListCell noWrap>Row 1</StructuredListCell>
+        <StructuredListCell>Row 1</StructuredListCell>
+        <StructuredListCell>
+          Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nunc dui
+          magna, finibus id tortor sed, aliquet bibendum augue. Aenean posuere
+          sem vel euismod dignissim. Nulla ut cursus dolor. Pellentesque
+          vulputate nisl a porttitor interdum.
+        </StructuredListCell>
+      </StructuredListRow>
+      <StructuredListRow>
+        <StructuredListCell noWrap>Row 2</StructuredListCell>
+        <StructuredListCell>Row 2</StructuredListCell>
+        <StructuredListCell>
+          Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nunc dui
+          magna, finibus id tortor sed, aliquet bibendum augue. Aenean posuere
+          sem vel euismod dignissim. Nulla ut cursus dolor. Pellentesque
+          vulputate nisl a porttitor interdum.
+        </StructuredListCell>
+      </StructuredListRow>
+    </StructuredListBody>
+  </StructuredListWrapper>
+);
 
 export const Selection = () => {
   const structuredListBodyRowGenerator = (numRows) => {
@@ -98,17 +133,17 @@ export const Selection = () => {
           defaultChecked={!i || null}
         />
         <StructuredListCell>
-          <CheckmarkFilled16
+          <CheckmarkFilled
             className={`${prefix}--structured-list-svg`}
             aria-label="select an option">
             <title>select an option</title>
-          </CheckmarkFilled16>
+          </CheckmarkFilled>
         </StructuredListCell>
       </StructuredListRow>
     ));
   };
   return (
-    <StructuredListWrapper selection>
+    <StructuredListWrapper selection {...props()}>
       <StructuredListHead>
         <StructuredListRow head>
           <StructuredListCell head>ColumnA</StructuredListCell>
@@ -124,14 +159,6 @@ export const Selection = () => {
   );
 };
 
-Selection.parameters = {
-  info: {
-    text: `
-    Structured Lists with selection allow a row of list content to be selected.
-  `,
-  },
-};
-
 export const Skeleton = () => (
   <div style={{ width: '800px' }}>
     <StructuredListSkeleton />
@@ -140,11 +167,3 @@ export const Skeleton = () => (
 );
 
 Skeleton.storyName = 'skeleton';
-
-Skeleton.parameters = {
-  info: {
-    text: `
-        Placeholder skeleton state to use when content is loading.
-      `,
-  },
-};

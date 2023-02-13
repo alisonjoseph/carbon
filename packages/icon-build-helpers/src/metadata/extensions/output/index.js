@@ -59,6 +59,23 @@ const output = (options = defaultOptions) => {
           continue;
         }
 
+        if (icon.sizes.length === 1 && icon.sizes[0] === 'glyph') {
+          const [asset] = icon.assets;
+          icon.output = [
+            {
+              descriptor: await createDescriptor(
+                icon.name,
+                asset.optimized.data,
+                'glyph'
+              ),
+              moduleName: getModuleName(icon.name, 'glyph', icon.namespace),
+              filepath: [...icon.namespace, icon.name, 'index.js'].join('/'),
+              size: 'glyph',
+            },
+          ];
+          continue;
+        }
+
         // If the target is not set to pictograms, then we're building up
         // metadata for icons
         const defaultAsset = icon.assets.find(
@@ -92,7 +109,7 @@ const output = (options = defaultOptions) => {
         // Handle glyph sizes that may not be one of our predetermined sizes
         const hasGlyphAsset = icon.sizes.find((size) => size === 'glyph');
         if (hasGlyphAsset) {
-          const asset = icon.assets.find((asset) => !asset.size);
+          const asset = icon.assets.find((asset) => asset.size === 'glyph');
           icon.output.push({
             descriptor: await createDescriptor(
               icon.name,
@@ -130,14 +147,18 @@ const output = (options = defaultOptions) => {
  */
 async function createDescriptor(name, data, size, original) {
   const info = await parse(data, name);
+  const { attrs } = info;
   const descriptor = {
     ...info,
     name,
+    attrs: {
+      ...attrs,
+      fill: 'currentColor',
+    },
   };
 
   if (size) {
     descriptor.size = size;
-    descriptor.attrs.fill = 'currentColor';
     if (size !== 'glyph') {
       descriptor.attrs.width = size;
       descriptor.attrs.height = size;
@@ -150,10 +171,8 @@ async function createDescriptor(name, data, size, original) {
       descriptor.attrs.height = height;
     }
   } else {
-    const [width, height] = info.attrs.viewBox.split(' ').slice(2);
-    descriptor.attrs.width = width;
-    descriptor.attrs.height = height;
-    descriptor.attrs.stroke = 'currentColor';
+    descriptor.attrs.width = 64;
+    descriptor.attrs.height = 64;
   }
 
   return descriptor;

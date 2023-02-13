@@ -8,27 +8,25 @@
 import PropTypes from 'prop-types';
 import React from 'react';
 import classnames from 'classnames';
-import { settings } from 'carbon-components';
-import { Copy16 } from '@carbon/icons-react';
+import { Copy as CopyIcon } from '@carbon/icons-react';
 import Copy from '../Copy';
-
-const { prefix } = settings;
+import { usePrefix } from '../../internal/usePrefix';
 
 export default function CopyButton({ iconDescription, className, ...other }) {
+  const prefix = usePrefix();
   return (
     <Copy
       className={classnames(className, `${prefix}--copy-btn`)}
       aria-label={iconDescription}
-      title={iconDescription}
       {...other}>
-      <Copy16 className={`${prefix}--snippet__icon`} />
+      <CopyIcon className={`${prefix}--snippet__icon`} />
     </Copy>
   );
 }
 
 CopyButton.propTypes = {
   /**
-   * Specify an optional className to be applied to the underlying <button>
+   * Specify an optional className to be applied to the underlying `<button>`
    */
   className: PropTypes.string,
 
@@ -51,7 +49,7 @@ CopyButton.propTypes = {
 
   /**
    * Specify an optional `onClick` handler that is called when the underlying
-   * <button> is clicked
+   * `<button>` is clicked
    */
   onClick: PropTypes.func,
 };

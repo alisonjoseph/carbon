@@ -5,27 +5,138 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-import React from 'react';
-import { addDecorator, addParameters } from '@storybook/react';
-import addons from '@storybook/addons';
-import { themes } from '@storybook/theming';
+import './styles.scss';
+import '../src/feature-flags';
+
 import { configureActions } from '@storybook/addon-actions';
-import {
-  CARBON_CURRENT_THEME,
-  CARBON_TYPE_TOKEN,
-} from './addon-carbon-theme/shared';
-import Container from './Container';
-import PackageInfo from './../package.json';
+import { white, g10, g90, g100 } from '@carbon/themes';
+import React from 'react';
+import { breakpoints } from '@carbon/layout';
+import { GlobalTheme } from '../src/components/Theme';
 
-const customPropertyPrefix = 'cds';
+import theme from './theme';
 
-addParameters({
+export const globalTypes = {
+  locale: {
+    name: 'Locale',
+    description: 'Set the localization for the storybook',
+    defaultValue: 'en',
+    toolbar: {
+      icon: 'globe',
+      items: [
+        {
+          right: '🇺🇸',
+          title: 'English',
+          value: 'en',
+        },
+        {
+          right: '🇵🇸',
+          title: 'Arabic',
+          value: 'ar',
+        },
+      ],
+    },
+  },
+  theme: {
+    name: 'Theme',
+    description: 'Set the global theme for displaying components',
+    defaultValue: 'white',
+    toolbar: {
+      icon: 'paintbrush',
+      items: ['white', 'g10', 'g90', 'g100'],
+    },
+  },
+};
+
+export const parameters = {
+  backgrounds: {
+    // https://storybook.js.org/docs/react/essentials/backgrounds#grid
+    grid: {
+      cellSize: 8,
+      opacity: 0.5,
+    },
+    values: [
+      {
+        name: 'white',
+        value: white.background,
+      },
+      {
+        name: 'g10',
+        value: g10.background,
+      },
+      {
+        name: 'g90',
+        value: g90.background,
+      },
+      {
+        name: 'g100',
+        value: g100.background,
+      },
+    ],
+  },
+  controls: {
+    // https://storybook.js.org/docs/react/essentials/controls#show-full-documentation-for-each-property
+    expanded: true,
+
+    // https://storybook.js.org/docs/react/essentials/controls#specify-initial-preset-color-swatches
+    // presetColors: [],
+
+    // https://storybook.js.org/docs/react/essentials/controls#sorting-controls
+    sort: 'alpha',
+
+    hideNoControlsWarning: true,
+  },
+  darkMode: {
+    current: 'light',
+  },
+  docs: {
+    theme,
+  },
+  // Small (<672)
+  // Medium (672 - 1056px)
+  // Large (1056 - 1312px)
+  // X-Large (1312 - 1584px)
+  // Max (>1584)
+  viewport: {
+    viewports: {
+      sm: {
+        name: 'Small',
+        styles: {
+          width: breakpoints.sm.width,
+          height: '100%',
+        },
+      },
+      md: {
+        name: 'Medium',
+        styles: {
+          width: breakpoints.md.width,
+          height: '100%',
+        },
+      },
+      lg: {
+        name: 'Large',
+        styles: {
+          width: breakpoints.lg.width,
+          height: '100%',
+        },
+      },
+      xlg: {
+        name: 'X-Large',
+        styles: {
+          width: breakpoints.xlg.width,
+          height: '100%',
+        },
+      },
+      Max: {
+        name: 'Max',
+        styles: {
+          width: breakpoints.max.width,
+          height: '100%',
+        },
+      },
+    },
+  },
   options: {
-    /**
-     * We sort our stories by default alphabetically, however there are specific
-     * keywords that will be sorted further down the sidebar, including
-     * "playground" and "unstable" stories.
-     */
     storySort: (storyA, storyB) => {
       // By default, sort by the story "kind". The "kind" refers to the
       // top-level title of the story, either through Component Story Format
@@ -40,12 +151,15 @@ addParameters({
       // To story the stories, we first build up a list of matches based on
       // keywords. Each keyword has a specific weight that will be used to
       // determine order later on.
-      const UNKNOWN_KEYWORD = 2;
+      const UNKNOWN_KEYWORD = 3;
       const keywords = new Map([
+        ['welcome', 0],
         ['default', 1],
-        ['playground', 3],
-        ['deprecated', 4],
-        ['unstable', 5],
+        ['usage', 2],
+        ['playground', 4],
+        ['development', 5],
+        ['deprecated', 6],
+        ['unstable', 7],
       ]);
       const matches = new Map();
 
@@ -86,39 +200,30 @@ addParameters({
       // two ids
       return idA.localeCompare(idB);
     },
-    theme: {
-      ...themes.light,
-      brandTitle: `Carbon Components React v${PackageInfo.version}`,
-      brandUrl:
-        'https://github.com/carbon-design-system/carbon/tree/master/packages/react',
-    },
   },
-});
+};
 
 configureActions({
   depth: 3,
   limit: 10,
 });
 
-addDecorator((story) => <Container story={story} />);
+export const decorators = [
+  (Story, context) => {
+    const { locale, theme } = context.globals;
 
-addons.getChannel().on(CARBON_CURRENT_THEME, (theme) => {
-  document.documentElement.setAttribute('storybook-carbon-theme', theme);
-});
+    React.useEffect(() => {
+      document.documentElement.setAttribute('data-carbon-theme', theme);
+    }, [theme]);
 
-addons.getChannel().on(CARBON_TYPE_TOKEN, ({ tokenName, tokenValue }) => {
-  const root = document.documentElement;
-  const [fontSize, lineHeight] = tokenValue.split('-');
-  const rem = (px) =>
-    `${
-      px / parseFloat(getComputedStyle(document.documentElement).fontSize)
-    }rem`;
-  root.style.setProperty(
-    `--${customPropertyPrefix}-${tokenName}-font-size`,
-    rem(fontSize)
-  );
-  root.style.setProperty(
-    `--${customPropertyPrefix}-${tokenName}-line-height`,
-    rem(lineHeight)
-  );
-});
+    React.useEffect(() => {
+      document.documentElement.lang = locale;
+    }, [locale]);
+
+    return (
+      <GlobalTheme theme={theme}>
+        <Story {...context} />
+      </GlobalTheme>
+    );
+  },
+];

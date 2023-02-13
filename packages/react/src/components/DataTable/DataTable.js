@@ -110,14 +110,9 @@ export default class DataTable extends React.Component {
     ).isRequired,
 
     /**
-     * `false` If true, will remove the table border
+     *  Change the row height of table. Currently supports `xs`, `sm`, `md`, `lg`, and `xl`.
      */
-    shouldShowBorder: PropTypes.bool,
-
-    /**
-     * `normal` Change the row height of table
-     */
-    size: PropTypes.oneOf(['compact', 'short', 'normal', 'tall']),
+    size: PropTypes.oneOf(['xs', 'sm', 'md', 'lg', 'xl']),
 
     /**
      * Optional hook to manually control sorting of the rows.
@@ -152,7 +147,7 @@ export default class DataTable extends React.Component {
     sortRow: defaultSortRow,
     filterRows: defaultFilterRows,
     locale: 'en',
-    size: 'normal',
+    size: 'lg',
     overflowMenuOnHover: true,
     translateWithId,
   };
@@ -202,6 +197,7 @@ export default class DataTable extends React.Component {
    * @param {object} config
    * @param {string} config.header the header we want the props for
    * @param {Function} config.onClick a custom click handler for the header
+   * @param {boolean} config.isSortable
    * @returns {object}
    */
   getHeaderProps = ({
@@ -217,17 +213,18 @@ export default class DataTable extends React.Component {
       sortDirection,
       isSortable,
       isSortHeader: sortHeaderKey === header.key,
-      // Compose the event handlers so we don't overwrite a consumer's `onClick`
-      // handler
-      onClick: composeEventHandlers([
-        this.handleSortBy(header.key),
-        onClick
-          ? this.handleOnHeaderClick(onClick, {
+      onClick: (event) => {
+        const nextSortState = getNextSortState(this.props, this.state, {
+          key: header.key,
+        });
+        this.setState(nextSortState, () => {
+          onClick &&
+            this.handleOnHeaderClick(onClick, {
               sortHeaderKey: header.key,
-              sortDirection,
-            })
-          : null,
-      ]),
+              sortDirection: nextSortState.sortDirection,
+            })(event);
+        });
+      },
     };
   };
 
@@ -236,14 +233,15 @@ export default class DataTable extends React.Component {
    *
    * @param {object} config
    * @param {Function} config.onClick a custom click handler for the expand header
+   * @param {Function} config.onExpand a custom click handler called when header is expanded
    * @returns {object}
    */
-  getExpandHeaderProps = ({ onClick, ...rest } = {}) => {
+  getExpandHeaderProps = ({ onClick, onExpand, ...rest } = {}) => {
     const { translateWithId: t } = this.props;
     const { isExpandedAll, rowIds, rowsById } = this.state;
     const isExpanded =
       isExpandedAll || rowIds.every((id) => rowsById[id].isExpanded);
-    const translationKey = !isExpanded
+    const translationKey = isExpanded
       ? translationKeys.collapseAll
       : translationKeys.expandAll;
     return {
@@ -254,6 +252,7 @@ export default class DataTable extends React.Component {
       // handler
       onExpand: composeEventHandlers([
         this.handleOnExpandAll,
+        onExpand,
         onClick
           ? this.handleOnExpandHeaderClick(onClick, {
               isExpanded,
@@ -317,6 +316,8 @@ export default class DataTable extends React.Component {
    * for a specific row.
    *
    * @param {object} [row] an optional row that we want to access the props for
+   * @param {Function} row.onClick
+   * @param {object} row.row
    * @returns {object}
    */
   getSelectionProps = ({ onClick, row, ...rest } = {}) => {
@@ -367,9 +368,10 @@ export default class DataTable extends React.Component {
 
   getToolbarProps = (props = {}) => {
     const { size } = this.props;
+    let isSmall = size === 'xs' || size === 'sm';
     return {
       ...props,
-      size: size === 'compact' || size === 'short' ? 'small' : 'normal',
+      size: isSmall ? 'sm' : undefined,
     };
   };
 
@@ -378,7 +380,7 @@ export default class DataTable extends React.Component {
     const totalSelected = this.getSelectedRows().length;
     return {
       ...props,
-      shouldShowBatchActions,
+      shouldShowBatchActions: shouldShowBatchActions && totalSelected > 0,
       totalSelected,
       onCancel: this.handleOnCancel,
     };
@@ -392,7 +394,6 @@ export default class DataTable extends React.Component {
       size,
       isSortable,
       useStaticWidth,
-      shouldShowBorder,
       stickyHeader,
       overflowMenuOnHover,
     } = this.props;
@@ -401,7 +402,6 @@ export default class DataTable extends React.Component {
       size,
       isSortable,
       useStaticWidth,
-      shouldShowBorder,
       stickyHeader,
       overflowMenuOnHover,
     };
@@ -411,10 +411,11 @@ export default class DataTable extends React.Component {
    * Helper utility to get the TableContainer Props.
    */
   getTableContainerProps = () => {
-    const { stickyHeader } = this.props;
+    const { stickyHeader, useStaticWidth } = this.props;
 
     return {
       stickyHeader,
+      useStaticWidth,
     };
   };
 
@@ -444,7 +445,7 @@ export default class DataTable extends React.Component {
           })
         : this.state.rowIds;
     if (filteredRowIds.length == 0) {
-      return this.state.rowIds;
+      return [];
     }
     return filteredRowIds;
   };

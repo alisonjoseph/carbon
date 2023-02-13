@@ -19,6 +19,7 @@ export const unstable_tokens = [
   'spacing10',
   'spacing11',
   'spacing12',
+  'spacing13',
 
   // Fluid spacing
   'fluidSpacing01',
@@ -26,21 +27,18 @@ export const unstable_tokens = [
   'fluidSpacing03',
   'fluidSpacing04',
 
-  // Layout
-  'layout01',
-  'layout02',
-  'layout03',
-  'layout04',
-  'layout05',
-  'layout06',
-  'layout07',
-
   // Containers
   'container01',
   'container02',
   'container03',
   'container04',
   'container05',
+  'sizeXSmall',
+  'sizeSmall',
+  'sizeMedium',
+  'sizeLarge',
+  'sizeXLarge',
+  'size2XLarge',
 
   // Icon sizes
   'iconSize01',

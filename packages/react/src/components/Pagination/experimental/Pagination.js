@@ -8,13 +8,13 @@
 import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import classnames from 'classnames';
-import { settings } from 'carbon-components';
-import { CaretRight16, CaretLeft16 } from '@carbon/icons-react';
+import { CaretRight, CaretLeft } from '@carbon/icons-react';
 import Button from '../../Button';
 import Select from '../../Select';
 import SelectItem from '../../SelectItem';
-
-const { prefix } = settings;
+import { IconButton } from '../../IconButton';
+import * as FeatureFlags from '@carbon/feature-flags';
+import { usePrefix } from '../../../internal/usePrefix';
 
 function Pagination({
   backwardText,
@@ -27,6 +27,7 @@ function Pagination({
   itemsPerPageText,
   itemRangeText,
   itemText,
+  onChange,
   pageRangeText,
   pageSize,
   pageSizes,
@@ -37,6 +38,7 @@ function Pagination({
 }) {
   const [currentPage, setCurrentPage] = useState(initialPage);
   const [currentPageSize, setCurrentPageSize] = useState(pageSize);
+  const prefix = usePrefix();
 
   const totalPages = totalItems
     ? Math.max(Math.ceil(totalItems / currentPageSize), 1)
@@ -47,6 +49,18 @@ function Pagination({
 
   function onSetPage(newPage) {
     setCurrentPage(Number(newPage));
+  }
+
+  function incrementPage() {
+    const page = currentPage + 1;
+    setCurrentPage(page);
+    onChange({ page, pageSize: currentPageSize });
+  }
+
+  function decrementPage() {
+    const page = currentPage - 1;
+    setCurrentPage(page);
+    onChange({ page, pageSize: currentPageSize });
   }
 
   const namespace = `${prefix}--unstable-pagination`;
@@ -129,38 +143,75 @@ function Pagination({
               : pageRangeText(currentPage, totalPages)}
           </span>
         )}
-        <Button
-          className={classnames(
-            `${namespace}__button`,
-            `${namespace}__button--backward`,
-            {
-              [`${namespace}__button--no-index`]: backButtonDisabled,
-            }
-          )}
-          onClick={() => setCurrentPage(currentPage - 1)}
-          disabled={backButtonDisabled}
-          hasIconOnly
-          renderIcon={CaretLeft16}
-          tooltipAlignment="center"
-          tooltipPosition="top"
-          iconDescription={backwardText}
-        />
-        <Button
-          className={classnames(
-            `${namespace}__button`,
-            `${namespace}__button--forward`,
-            {
-              [`${namespace}__button--no-index`]: forwardButtonDisabled,
-            }
-          )}
-          onClick={() => setCurrentPage(currentPage + 1)}
-          disabled={forwardButtonDisabled}
-          hasIconOnly
-          renderIcon={CaretRight16}
-          tooltipAlignment="center"
-          tooltipPosition="top"
-          iconDescription={forwardText}
-        />
+        {FeatureFlags.enabled('enable-v11-release') ? (
+          <>
+            <IconButton
+              align="top"
+              disabled={backButtonDisabled}
+              kind="ghost"
+              className={classnames(
+                `${namespace}__button`,
+                `${namespace}__button--backward`,
+                {
+                  [`${namespace}__button--no-index`]: backButtonDisabled,
+                }
+              )}
+              label={backwardText}
+              onClick={() => decrementPage()}>
+              <CaretLeft />
+            </IconButton>
+            <IconButton
+              align="top-right"
+              disabled={forwardButtonDisabled}
+              kind="ghost"
+              className={classnames(
+                `${namespace}__button`,
+                `${namespace}__button--forward`,
+                {
+                  [`${namespace}__button--no-index`]: forwardButtonDisabled,
+                }
+              )}
+              label={forwardText}
+              onClick={() => incrementPage()}>
+              <CaretRight />
+            </IconButton>
+          </>
+        ) : (
+          <>
+            <Button
+              className={classnames(
+                `${namespace}__button`,
+                `${namespace}__button--backward`,
+                {
+                  [`${namespace}__button--no-index`]: backButtonDisabled,
+                }
+              )}
+              onClick={() => decrementPage()}
+              disabled={backButtonDisabled}
+              hasIconOnly
+              renderIcon={CaretLeft}
+              tooltipAlignment="center"
+              tooltipPosition="top"
+              iconDescription={backwardText}
+            />
+            <Button
+              className={classnames(
+                `${namespace}__button`,
+                `${namespace}__button--forward`,
+                {
+                  [`${namespace}__button--no-index`]: forwardButtonDisabled,
+                }
+              )}
+              onClick={() => incrementPage()}
+              disabled={forwardButtonDisabled}
+              hasIconOnly
+              renderIcon={CaretRight}
+              tooltipAlignment="center"
+              tooltipPosition="top"
+              iconDescription={forwardText}
+            />
+          </>
+        )}
       </div>
     </section>
   );
@@ -215,6 +266,11 @@ Pagination.propTypes = {
    * The translatable text indicating the number of items per page.
    */
   itemsPerPageText: PropTypes.string,
+
+  /**
+   * The callback function called when the current page changes.
+   */
+  onChange: PropTypes.func,
 
   /**
    * The function returning a translatable text showing where the current page is,

@@ -8,11 +8,10 @@
 import PropTypes from 'prop-types';
 import React from 'react';
 import cx from 'classnames';
-import { settings } from 'carbon-components';
-
-const { prefix } = settings;
+import { usePrefix } from '../../internal/usePrefix';
 
 const DatePickerSkeleton = ({ range, id, className, ...rest }) => {
+  const prefix = usePrefix();
   const dateInput = (
     <div className={`${prefix}--date-picker-container`}>
       {
@@ -76,3 +75,4 @@ DatePickerSkeleton.propTypes = {
 };
 
 export default DatePickerSkeleton;
+export { DatePickerSkeleton };

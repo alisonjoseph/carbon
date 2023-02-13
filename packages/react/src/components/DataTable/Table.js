@@ -5,12 +5,11 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-import React from 'react';
+import React, { useContext } from 'react';
 import PropTypes from 'prop-types';
 import cx from 'classnames';
-import { settings } from 'carbon-components';
-
-const { prefix } = settings;
+import { usePrefix } from '../../internal/usePrefix';
+import { TableContext } from './TableContext';
 
 export const Table = ({
   className,
@@ -19,25 +18,27 @@ export const Table = ({
   size,
   isSortable,
   useStaticWidth,
-  shouldShowBorder,
   stickyHeader,
   overflowMenuOnHover,
   ...other
 }) => {
+  const { titleId, descriptionId } = useContext(TableContext);
+  const prefix = usePrefix();
   const componentClass = cx(`${prefix}--data-table`, className, {
-    [`${prefix}--data-table--compact`]: size === 'compact',
-    [`${prefix}--data-table--short`]: size === 'short',
-    [`${prefix}--data-table--tall`]: size === 'tall',
+    [`${prefix}--data-table--${size}`]: size,
     [`${prefix}--data-table--sort`]: isSortable,
     [`${prefix}--data-table--zebra`]: useZebraStyles,
     [`${prefix}--data-table--static`]: useStaticWidth,
-    [`${prefix}--data-table--no-border`]: !shouldShowBorder,
     [`${prefix}--data-table--sticky-header`]: stickyHeader,
     [`${prefix}--data-table--visible-overflow-menu`]: !overflowMenuOnHover,
   });
   const table = (
     <div className={`${prefix}--data-table-content`}>
-      <table {...other} className={componentClass}>
+      <table
+        aria-labelledby={titleId}
+        aria-describedby={descriptionId}
+        {...other}
+        className={componentClass}>
         {children}
       </table>
     </div>
@@ -70,14 +71,9 @@ Table.propTypes = {
   overflowMenuOnHover: PropTypes.bool,
 
   /**
-   * `false` If true, will remove the table border
+   *  Change the row height of table. Currently supports `xs`, `sm`, `md`, `lg`, and `xl`.
    */
-  shouldShowBorder: PropTypes.bool,
-
-  /**
-   * `normal` Change the row height of table
-   */
-  size: PropTypes.oneOf(['compact', 'short', 'normal', 'tall']),
+  size: PropTypes.oneOf(['xs', 'sm', 'md', 'lg', 'xl']),
 
   /**
    * `false` If true, will keep the header sticky (only data rows will scroll)

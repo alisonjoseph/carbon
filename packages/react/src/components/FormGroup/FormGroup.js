@@ -7,29 +7,34 @@
 
 import PropTypes from 'prop-types';
 import React from 'react';
-import classnames from 'classnames';
-import { settings } from 'carbon-components';
-
-const { prefix } = settings;
+import cx from 'classnames';
+import { usePrefix } from '../../internal/usePrefix';
 
 const FormGroup = ({
+  legendId,
   legendText,
   invalid,
   children,
   className,
   message,
   messageText,
-  ...other
+  ...rest
 }) => {
-  const classNamesLegend = classnames(`${prefix}--label`, className);
-  const classNamesFieldset = classnames(`${prefix}--fieldset`, className);
+  const prefix = usePrefix();
+
+  const classNamesFieldset = cx(`${prefix}--fieldset`, className);
 
   return (
     <fieldset
       {...(invalid && { 'data-invalid': '' })}
       className={classNamesFieldset}
-      {...other}>
-      <legend className={classNamesLegend}>{legendText}</legend>
+      {...rest}
+      aria-labelledby={rest['aria-labelledby'] || legendId}>
+      <legend
+        className={`${prefix}--label`}
+        id={legendId || rest['aria-labelledby']}>
+        {legendText}
+      </legend>
       {children}
       {message ? (
         <div className={`${prefix}--form__requirements`}>{messageText}</div>
@@ -53,6 +58,12 @@ FormGroup.propTypes = {
    * Specify whether the <FormGroup> is invalid
    */
   invalid: PropTypes.bool,
+
+  /**
+   * Provide id for the fieldset <legend> which corresponds to the fieldset
+   * `aria-labelledby`
+   */
+  legendId: PropTypes.node,
 
   /**
    * Provide the text to be rendered inside of the fieldset <legend>

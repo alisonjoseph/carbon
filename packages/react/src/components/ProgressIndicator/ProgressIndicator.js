@@ -5,21 +5,17 @@
  * LICENSE file in the root directory of this source tree.
  */
 
+import cx from 'classnames';
 import PropTypes from 'prop-types';
-import React, { Component } from 'react';
-import classnames from 'classnames';
-import { settings } from 'carbon-components';
-import {
-  CheckmarkOutline16,
-  Warning16,
-  RadioButton16,
-  CircleFilled16,
-} from '@carbon/icons-react';
+import React, { useState } from 'react';
 import { keys, matches } from '../../internal/keyboard';
-
-const { prefix } = settings;
-
-const defaultRenderLabel = (props) => <p {...props} />;
+import {
+  CheckmarkOutline,
+  Warning,
+  CircleDash,
+  Incomplete,
+} from '@carbon/icons-react';
+import { usePrefix } from '../../internal/usePrefix';
 
 const defaultTranslations = {
   'carbon.progress-step.complete': 'Complete',
@@ -31,8 +27,97 @@ const defaultTranslations = {
 function translateWithId(messageId) {
   return defaultTranslations[messageId];
 }
+function ProgressIndicator({
+  children,
+  className: customClassName,
+  currentIndex: controlledIndex = 0,
+  onChange,
+  spaceEqually,
+  vertical,
+  ...rest
+}) {
+  const prefix = usePrefix();
+  const [currentIndex, setCurrentIndex] = useState(controlledIndex);
+  const [prevControlledIndex, setPrevControlledIndex] =
+    useState(controlledIndex);
+  const className = cx({
+    [`${prefix}--progress`]: true,
+    [`${prefix}--progress--vertical`]: vertical,
+    [`${prefix}--progress--space-equal`]: spaceEqually && !vertical,
+    [customClassName]: customClassName,
+  });
 
-export function ProgressStep({
+  if (controlledIndex !== prevControlledIndex) {
+    setCurrentIndex(controlledIndex);
+    setPrevControlledIndex(controlledIndex);
+  }
+
+  return (
+    <ul className={className} {...rest}>
+      {React.Children.map(children, (child, index) => {
+        // only setup click handlers if onChange event is passed
+        const onClick = onChange ? () => onChange(index) : undefined;
+        if (index === currentIndex) {
+          return React.cloneElement(child, {
+            complete: child.props.complete,
+            current: child.props.complete ? false : true,
+            index,
+            onClick,
+          });
+        }
+        if (index < currentIndex) {
+          return React.cloneElement(child, {
+            complete: true,
+            index,
+            onClick,
+          });
+        }
+        if (index > currentIndex) {
+          return React.cloneElement(child, {
+            complete: child.props.complete || false,
+            index,
+            onClick,
+          });
+        }
+        return null;
+      })}
+    </ul>
+  );
+}
+
+ProgressIndicator.propTypes = {
+  /**
+   * Provide `<ProgressStep>` components to be rendered in the
+   * `<ProgressIndicator>`
+   */
+  children: PropTypes.node,
+
+  /**
+   * Provide an optional className to be applied to the containing node
+   */
+  className: PropTypes.string,
+
+  /**
+   * Optionally specify the current step array index
+   */
+  currentIndex: PropTypes.number,
+
+  /**
+   * Optional callback called if a ProgressStep is clicked on.  Returns the index of the step.
+   */
+  onChange: PropTypes.func,
+
+  /**
+   * Specify whether the progress steps should be split equally in size in the div
+   */
+  spaceEqually: PropTypes.bool,
+  /**
+   * Determines whether or not the ProgressIndicator should be rendered vertically.
+   */
+  vertical: PropTypes.bool,
+};
+
+function ProgressStep({
   label,
   description,
   className,
@@ -42,11 +127,11 @@ export function ProgressStep({
   secondaryLabel,
   disabled,
   onClick,
-  renderLabel: ProgressStepLabel,
   translateWithId: t,
   ...rest
 }) {
-  const classes = classnames({
+  const prefix = usePrefix();
+  const classes = cx({
     [`${prefix}--progress-step`]: true,
     [`${prefix}--progress-step--current`]: current,
     [`${prefix}--progress-step--complete`]: complete,
@@ -64,26 +149,30 @@ export function ProgressStep({
   // eslint-disable-next-line react/prop-types
   const SVGIcon = ({ complete, current, description, invalid, prefix }) => {
     if (invalid) {
-      return <Warning16 className={`${prefix}--progress__warning`} />;
+      return (
+        <Warning className={`${prefix}--progress__warning`}>
+          <title>{description}</title>
+        </Warning>
+      );
     }
     if (current) {
       return (
-        <CircleFilled16>
+        <Incomplete>
           <title>{description}</title>
-        </CircleFilled16>
+        </Incomplete>
       );
     }
     if (complete) {
       return (
-        <CheckmarkOutline16>
+        <CheckmarkOutline>
           <title>{description}</title>
-        </CheckmarkOutline16>
+        </CheckmarkOutline>
       );
     }
     return (
-      <RadioButton16>
+      <CircleDash>
         <title>{description}</title>
-      </RadioButton16>
+      </CircleDash>
     );
   };
 
@@ -105,7 +194,7 @@ export function ProgressStep({
     <li className={classes}>
       <button
         type="button"
-        className={classnames(`${prefix}--progress-step-button`, {
+        className={cx(`${prefix}--progress-step-button`, {
           [`${prefix}--progress-step-button--unclickable`]: !onClick || current,
         })}
         disabled={disabled}
@@ -115,7 +204,6 @@ export function ProgressStep({
         onKeyDown={handleKeyDown}
         title={label}
         {...rest}>
-        <span className={`${prefix}--assistive-text`}>{message}</span>
         <SVGIcon
           complete={complete}
           current={current}
@@ -123,12 +211,13 @@ export function ProgressStep({
           invalid={invalid}
           prefix={prefix}
         />
-        <ProgressStepLabel className={`${prefix}--progress-label`}>
-          {label}
-        </ProgressStepLabel>
-        {secondaryLabel !== null && secondaryLabel !== undefined ? (
-          <p className={`${prefix}--progress-optional`}>{secondaryLabel}</p>
-        ) : null}
+        <div className={`${prefix}--progress-text`}>
+          <p className={`${prefix}--progress-label`}>{label}</p>
+          {secondaryLabel !== null && secondaryLabel !== undefined ? (
+            <p className={`${prefix}--progress-optional`}>{secondaryLabel}</p>
+          ) : null}
+        </div>
+        <span className={`${prefix}--assistive-text`}>{message}</span>
         <span className={`${prefix}--progress-line`} />
       </button>
     </li>
@@ -137,7 +226,7 @@ export function ProgressStep({
 
 ProgressStep.propTypes = {
   /**
-   * Provide an optional className to be applied to the containing <li> node
+   * Provide an optional className to be applied to the containing `<li>` node
    */
   className: PropTypes.string,
 
@@ -152,7 +241,7 @@ ProgressStep.propTypes = {
   current: PropTypes.bool,
 
   /**
-   * Provide a description for the <ProgressStep>
+   * Provide a description for the `<ProgressStep>`
    */
   description: PropTypes.string,
 
@@ -172,7 +261,7 @@ ProgressStep.propTypes = {
   invalid: PropTypes.bool,
 
   /**
-   * Provide the label for the <ProgressStep>
+   * Provide the label for the `<ProgressStep>`
    */
   label: PropTypes.node.isRequired,
 
@@ -185,12 +274,6 @@ ProgressStep.propTypes = {
    * Provide the props that describe a progress step tooltip
    */
   overflowTooltipProps: PropTypes.object,
-
-  /*
-   * An optional parameter to allow for overflow content to be rendered in a
-   * tooltip.
-   */
-  renderLabel: PropTypes.func,
 
   /**
    * Provide an optional secondary label
@@ -210,108 +293,7 @@ ProgressStep.propTypes = {
 };
 
 ProgressStep.defaultProps = {
-  renderLabel: defaultRenderLabel,
   translateWithId,
 };
 
-export class ProgressIndicator extends Component {
-  state = {};
-
-  static propTypes = {
-    /**
-     * Provide <ProgressStep> components to be rendered in the
-     * <ProgressIndicator>
-     */
-    children: PropTypes.node,
-
-    /**
-     * Provide an optional className to be applied to the containing node
-     */
-    className: PropTypes.string,
-
-    /**
-     * Optionally specify the current step array index
-     */
-    currentIndex: PropTypes.number,
-
-    /**
-     * Optional callback called if a ProgressStep is clicked on.  Returns the index of the step.
-     */
-    onChange: PropTypes.func,
-
-    /**
-     * Specify whether the progress steps should be split equally in size in the div
-     */
-    spaceEqually: PropTypes.bool,
-    /**
-     * Determines whether or not the ProgressIndicator should be rendered vertically.
-     */
-    vertical: PropTypes.bool,
-  };
-
-  static defaultProps = {
-    currentIndex: 0,
-  };
-
-  static getDerivedStateFromProps({ currentIndex }, state) {
-    const { prevCurrentIndex } = state;
-    return prevCurrentIndex === currentIndex
-      ? null
-      : {
-          currentIndex,
-          prevCurrentIndex: currentIndex,
-        };
-  }
-
-  renderSteps = () => {
-    const { onChange } = this.props;
-
-    return React.Children.map(this.props.children, (child, index) => {
-      // only setup click handlers if onChange event is passed
-      const onClick = onChange ? () => onChange(index) : undefined;
-      if (index === this.state.currentIndex) {
-        return React.cloneElement(child, {
-          current: true,
-          index,
-          onClick,
-        });
-      }
-      if (index < this.state.currentIndex) {
-        return React.cloneElement(child, {
-          complete: true,
-          index,
-          onClick,
-        });
-      }
-      if (index > this.state.currentIndex) {
-        return React.cloneElement(child, {
-          complete: false,
-          index,
-          onClick,
-        });
-      }
-      return null;
-    });
-  };
-
-  render() {
-    const {
-      className,
-      currentIndex, // eslint-disable-line no-unused-vars
-      vertical,
-      spaceEqually,
-      ...other
-    } = this.props;
-    const classes = classnames({
-      [`${prefix}--progress`]: true,
-      [`${prefix}--progress--vertical`]: vertical,
-      [`${prefix}--progress--space-equal`]: spaceEqually && !vertical,
-      [className]: className,
-    });
-    return (
-      <ul className={classes} {...other}>
-        {this.renderSteps()}
-      </ul>
-    );
-  }
-}
+export { ProgressIndicator, ProgressStep };

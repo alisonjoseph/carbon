@@ -8,11 +8,10 @@
 import PropTypes from 'prop-types';
 import React from 'react';
 import cx from 'classnames';
-import { settings } from 'carbon-components';
-
-const { prefix } = settings;
+import { usePrefix } from '../../internal/usePrefix';
 
 const DataTableSkeleton = ({
+  headers,
   rowCount,
   columnCount,
   zebra,
@@ -22,6 +21,7 @@ const DataTableSkeleton = ({
   showToolbar,
   ...rest
 }) => {
+  const prefix = usePrefix();
   const dataTableSkeletonClasses = cx(className, {
     [`${prefix}--skeleton`]: true,
     [`${prefix}--data-table`]: true,
@@ -67,7 +67,13 @@ const DataTableSkeleton = ({
           <tr>
             {columnsArray.map((i) => (
               <th key={i}>
-                <span></span>
+                {headers ? (
+                  <div className="bx--table-header-label">
+                    {headers[i]?.header}
+                  </div>
+                ) : (
+                  <span></span>
+                )}
               </th>
             ))}
           </tr>
@@ -131,7 +137,6 @@ DataTableSkeleton.defaultProps = {
   columnCount: 5,
   zebra: false,
   compact: false,
-  headers: [],
   showHeader: true,
   showToolbar: true,
 };

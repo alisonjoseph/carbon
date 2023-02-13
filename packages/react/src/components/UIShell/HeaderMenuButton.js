@@ -5,25 +5,26 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-import { Close20, Menu20 } from '@carbon/icons-react';
+import { Close, Menu } from '@carbon/icons-react';
 
-import { settings } from 'carbon-components';
 import cx from 'classnames';
 import React from 'react';
 import PropTypes from 'prop-types';
 import { AriaLabelPropType } from '../../prop-types/AriaPropTypes';
+import { usePrefix } from '../../internal/usePrefix';
 
-const { prefix } = settings;
-
-const HeaderMenuButton = ({
+function HeaderMenuButton({
   'aria-label': ariaLabel,
   'aria-labelledby': ariaLabelledBy,
   className: customClassName,
+  renderMenuIcon,
+  renderCloseIcon,
   onClick,
   isActive,
   isCollapsible,
   ...rest
-}) => {
+}) {
+  const prefix = usePrefix();
   const className = cx({
     [customClassName]: !!customClassName,
     [`${prefix}--header__action`]: true,
@@ -36,6 +37,8 @@ const HeaderMenuButton = ({
     'aria-label': ariaLabel,
     'aria-labelledby': ariaLabelledBy,
   };
+  const menuIcon = renderMenuIcon ? renderMenuIcon : <Menu size={20} />;
+  const closeIcon = renderCloseIcon ? renderCloseIcon : <Close size={20} />;
 
   return (
     <button
@@ -45,10 +48,10 @@ const HeaderMenuButton = ({
       title={ariaLabel}
       type="button"
       onClick={onClick}>
-      {isActive ? <Close20 /> : <Menu20 />}
+      {isActive ? closeIcon : menuIcon}
     </button>
   );
-};
+}
 
 HeaderMenuButton.propTypes = {
   /**
@@ -62,6 +65,9 @@ HeaderMenuButton.propTypes = {
    */
   className: PropTypes.string,
 
+  /**
+   * Specify whether the menu button is "active".
+   */
   isActive: PropTypes.bool,
 
   /**

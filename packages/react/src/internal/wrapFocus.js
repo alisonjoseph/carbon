@@ -6,37 +6,33 @@
  */
 
 import findLast from 'lodash.findlast';
-import { settings } from 'carbon-components';
 import {
   DOCUMENT_POSITION_BROAD_PRECEDING,
   DOCUMENT_POSITION_BROAD_FOLLOWING,
   selectorTabbable,
 } from './keyboard/navigation';
 
-const { prefix } = settings;
-
 /**
  * @param {Node} node A DOM node.
  * @param {string[]} selectorsFloatingMenus The CSS selectors that matches floating menus.
  * @returns {boolean} `true` of the given `node` is in a floating menu.
  */
-function elementOrParentIsFloatingMenu(
-  node,
-  selectorsFloatingMenus = [
-    `.${prefix}--overflow-menu-options`,
-    `.${prefix}--tooltip`,
-    '.flatpickr-calendar',
-  ]
-) {
+function elementOrParentIsFloatingMenu(node, selectorsFloatingMenus = []) {
   if (node && typeof node.closest === 'function') {
-    return selectorsFloatingMenus.some((selector) => node.closest(selector));
+    const allSelectorsFloatingMenus = [
+      `.cds--overflow-menu-options`,
+      `.cds--tooltip`,
+      '.flatpickr-calendar',
+      ...selectorsFloatingMenus,
+    ];
+    return allSelectorsFloatingMenus.some((selector) => node.closest(selector));
   }
 }
 
 /**
  * Ensures the focus is kept in the given `modalNode`, implementing "focus-wrap" behavior.
  * @param {object} options The options.
- * @param {Node} options.modalNode The DOM node of the inner modal.
+ * @param {Node} options.bodyNode
  * @param {Node} options.startTrapNode The DOM node of the focus sentinel the is placed earlier next to `modalNode`.
  * @param {Node} options.endTrapNode The DOM node of the focus sentinel the is placed next to `modalNode`.
  * @param {Node} options.currentActiveNode The DOM node that has focus.
@@ -58,9 +54,8 @@ function wrapFocus({
     !bodyNode.contains(currentActiveNode) &&
     !elementOrParentIsFloatingMenu(currentActiveNode, selectorsFloatingMenus)
   ) {
-    const comparisonResult = oldActiveNode.compareDocumentPosition(
-      currentActiveNode
-    );
+    const comparisonResult =
+      oldActiveNode.compareDocumentPosition(currentActiveNode);
     if (
       currentActiveNode === startTrapNode ||
       comparisonResult & DOCUMENT_POSITION_BROAD_PRECEDING

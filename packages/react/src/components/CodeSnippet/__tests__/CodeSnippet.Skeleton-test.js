@@ -6,11 +6,10 @@
  */
 
 import { render, cleanup } from '@carbon/test-utils/react';
-import { settings } from 'carbon-components';
 import React from 'react';
 import { CodeSnippetSkeleton } from '../';
 
-const { prefix } = settings;
+const prefix = 'cds';
 const snippetTypes = ['single', 'multi'];
 
 describe('CodeSnippetSkeleton', () => {
@@ -26,10 +25,10 @@ describe('CodeSnippetSkeleton', () => {
     );
 
     it.each(snippetTypes)(
-      'should have no DAP violations with type="%s"',
+      'should have no AC violations with type="%s"',
       async (type) => {
         const { container } = render(<CodeSnippetSkeleton type={type} />);
-        await expect(container).toHaveNoDAPViolations(
+        await expect(container).toHaveNoACViolations(
           `CodeSnippetSkeleton-${type}`
         );
       }

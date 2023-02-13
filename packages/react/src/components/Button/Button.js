@@ -6,46 +6,64 @@
  */
 
 import PropTypes from 'prop-types';
-import React from 'react';
+import React, { useRef } from 'react';
 import classNames from 'classnames';
-import { settings } from 'carbon-components';
 import { ButtonKinds } from '../../prop-types/types';
-import deprecate from '../../prop-types/deprecate';
+import { IconButton } from '../IconButton';
+import { composeEventHandlers } from '../../tools/events';
+import { usePrefix } from '../../internal/usePrefix';
+import { useId } from '../../internal/useId';
 
-const { prefix } = settings;
 const Button = React.forwardRef(function Button(
   {
-    children,
     as,
+    children,
     className,
-    disabled,
-    small,
-    size,
-    kind,
+    dangerDescription = 'danger',
+    disabled = false,
+    hasIconOnly = false,
     href,
-    tabIndex,
-    type,
-    renderIcon: ButtonImageElement,
     iconDescription,
-    hasIconOnly,
-    tooltipPosition,
-    tooltipAlignment,
-    ...other
+    isExpressive = false,
+    isSelected,
+    kind = 'primary',
+    onBlur,
+    onClick,
+    onFocus,
+    onMouseEnter,
+    onMouseLeave,
+    renderIcon: ButtonImageElement,
+    size = 'lg',
+    tabIndex = 0,
+    tooltipAlignment = 'center',
+    tooltipPosition = 'top',
+    type = 'button',
+    ...rest
   },
   ref
 ) {
+  const tooltipRef = useRef(null);
+  const prefix = usePrefix();
+
+  const handleClick = (evt) => {
+    // Prevent clicks on the tooltip from triggering the button click event
+    if (evt.target === tooltipRef.current) {
+      evt.preventDefault();
+      return;
+    }
+  };
+
   const buttonClasses = classNames(className, {
     [`${prefix}--btn`]: true,
-    [`${prefix}--btn--field`]: size === 'field',
-    [`${prefix}--btn--sm`]: size === 'small' || small,
+    [`${prefix}--btn--sm`]: size === 'sm' && !isExpressive,
+    [`${prefix}--btn--md`]: size === 'md' && !isExpressive,
+    [`${prefix}--btn--xl`]: size === 'xl',
+    [`${prefix}--btn--2xl`]: size === '2xl',
     [`${prefix}--btn--${kind}`]: kind,
     [`${prefix}--btn--disabled`]: disabled,
+    [`${prefix}--btn--expressive`]: isExpressive,
     [`${prefix}--btn--icon-only`]: hasIconOnly,
-    [`${prefix}--tooltip__trigger`]: hasIconOnly,
-    [`${prefix}--tooltip--a11y`]: hasIconOnly,
-    [`${prefix}--tooltip--${tooltipPosition}`]: hasIconOnly && tooltipPosition,
-    [`${prefix}--tooltip--align-${tooltipAlignment}`]:
-      hasIconOnly && tooltipAlignment,
+    [`${prefix}--btn--selected`]: hasIconOnly && isSelected && kind === 'ghost',
   });
 
   const commonProps = {
@@ -62,17 +80,35 @@ const Button = React.forwardRef(function Button(
     />
   );
 
+  const iconOnlyImage = !ButtonImageElement ? null : <ButtonImageElement />;
+
+  const dangerButtonVariants = ['danger', 'danger--tertiary', 'danger--ghost'];
+
   let component = 'button';
+  const assistiveId = useId('danger-description');
   let otherProps = {
     disabled,
     type,
+    'aria-describedby': dangerButtonVariants.includes(kind)
+      ? assistiveId
+      : null,
+    'aria-pressed': hasIconOnly && kind === 'ghost' ? isSelected : null,
   };
   const anchorProps = {
     href,
   };
-  const assistiveText = hasIconOnly ? (
-    <span className={`${prefix}--assistive-text`}>{iconDescription}</span>
-  ) : null;
+
+  let assistiveText;
+  if (dangerButtonVariants.includes(kind)) {
+    assistiveText = (
+      <span id={assistiveId} className={`${prefix}--visually-hidden`}>
+        {dangerDescription}
+      </span>
+    );
+  } else {
+    assistiveText = null;
+  }
+
   if (as) {
     component = as;
     otherProps = {
@@ -83,10 +119,16 @@ const Button = React.forwardRef(function Button(
     component = 'a';
     otherProps = anchorProps;
   }
-  return React.createElement(
+
+  const Button = React.createElement(
     component,
     {
-      ...other,
+      onMouseEnter,
+      onMouseLeave,
+      onFocus,
+      onBlur,
+      onClick,
+      ...rest,
       ...commonProps,
       ...otherProps,
     },
@@ -94,6 +136,46 @@ const Button = React.forwardRef(function Button(
     children,
     buttonImage
   );
+
+  if (hasIconOnly) {
+    let align;
+
+    if (tooltipPosition === 'top' || tooltipPosition === 'bottom') {
+      if (tooltipAlignment === 'center') {
+        align = tooltipPosition;
+      }
+      if (tooltipAlignment === 'end') {
+        align = `${tooltipPosition}-right`;
+      }
+      if (tooltipAlignment === 'start') {
+        align = `${tooltipPosition}-left`;
+      }
+    }
+
+    if (tooltipPosition === 'right' || tooltipPosition === 'left') {
+      align = tooltipPosition;
+    }
+
+    return (
+      <IconButton
+        as={as}
+        align={align}
+        label={iconDescription}
+        kind={kind}
+        size={size}
+        onMouseEnter={onMouseEnter}
+        onMouseLeave={onMouseLeave}
+        onFocus={onFocus}
+        onBlur={onBlur}
+        onClick={composeEventHandlers([onClick, handleClick])}
+        {...rest}
+        {...commonProps}
+        {...otherProps}>
+        {iconOnlyImage ? iconOnlyImage : children}
+      </IconButton>
+    );
+  }
+  return Button;
 });
 
 Button.displayName = 'Button';
@@ -119,6 +201,11 @@ Button.propTypes = {
   className: PropTypes.string,
 
   /**
+   * Specify the message read by screen readers for the danger button variant
+   */
+  dangerDescription: PropTypes.string,
+
+  /**
    * Specify whether the Button should be disabled, or not
    */
   disabled: PropTypes.bool,
@@ -129,7 +216,7 @@ Button.propTypes = {
   hasIconOnly: PropTypes.bool,
 
   /**
-   * Optionally specify an href for your Button to become an <a> element
+   * Optionally specify an href for your Button to become an `<a>` element
    */
   href: PropTypes.string,
 
@@ -147,9 +234,49 @@ Button.propTypes = {
   },
 
   /**
+   * Specify whether the Button is expressive, or not
+   */
+  isExpressive: PropTypes.bool,
+
+  /**
+   * Specify whether the Button is currently selected. Only applies to the Ghost variant.
+   */
+  isSelected: PropTypes.bool,
+
+  /**
    * Specify the kind of Button you want to create
    */
-  kind: PropTypes.oneOf(ButtonKinds).isRequired,
+  kind: PropTypes.oneOf(ButtonKinds),
+
+  /**
+   * Provide an optional function to be called when the button element
+   * loses focus
+   */
+  onBlur: PropTypes.func,
+
+  /**
+   * Provide an optional function to be called when the button element
+   * is clicked
+   */
+  onClick: PropTypes.func,
+
+  /**
+   * Provide an optional function to be called when the button element
+   * receives focus
+   */
+  onFocus: PropTypes.func,
+
+  /**
+   * Provide an optional function to be called when the mouse
+   * enters the button element
+   */
+  onMouseEnter: PropTypes.func,
+
+  /**
+   * Provide an optional function to be called when the mouse
+   * leaves the button element
+   */
+  onMouseLeave: PropTypes.func,
 
   /**
    * Optional prop to allow overriding the icon rendering.
@@ -163,19 +290,9 @@ Button.propTypes = {
   role: PropTypes.string,
 
   /**
-   * Specify the size of the button, from a list of available sizes.
-   * For `default` buttons, this prop can remain unspecified.
+   * Specify the size of the button, from the following list of sizes:
    */
-  size: PropTypes.oneOf(['default', 'field', 'small']),
-
-  /**
-   * Deprecated in v10 in favor of `size`.
-   * Specify whether the Button should be a small variant
-   */
-  small: deprecate(
-    PropTypes.bool,
-    `\nThe prop \`small\` for Button has been deprecated in favor of \`size\`. Please use \`size="small"\` instead.`
-  ),
+  size: PropTypes.oneOf(['sm', 'md', 'lg', 'xl', '2xl']),
 
   /**
    * Optional prop to specify the tabIndex of the Button
@@ -198,16 +315,6 @@ Button.propTypes = {
    * Optional prop to specify the type of the Button
    */
   type: PropTypes.oneOf(['button', 'reset', 'submit']),
-};
-
-Button.defaultProps = {
-  tabIndex: 0,
-  type: 'button',
-  disabled: false,
-  kind: 'primary',
-  size: 'default',
-  tooltipAlignment: 'center',
-  tooltipPosition: 'top',
 };
 
 export default Button;

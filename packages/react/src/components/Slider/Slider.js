@@ -8,14 +8,14 @@
 import React, { PureComponent } from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
-import { settings } from 'carbon-components';
 import throttle from 'lodash.throttle';
+import * as FeatureFlags from '@carbon/feature-flags';
 
 import * as keys from '../../internal/keyboard/keys';
 import { matches } from '../../internal/keyboard/match';
+import { PrefixContext } from '../../internal/usePrefix';
 import deprecate from '../../prop-types/deprecate';
-
-const { prefix } = settings;
+import { FeatureFlagContext } from '../FeatureFlags';
 
 const defaultFormatLabel = (value, label) => {
   return typeof label === 'function' ? label(value) : `${value}${label}`;
@@ -91,7 +91,11 @@ export default class Slider extends PureComponent {
     /**
      * `true` to use the light version.
      */
-    light: PropTypes.bool,
+    light: deprecate(
+      PropTypes.bool,
+      'The `light` prop for `Slider` is no longer needed and has ' +
+        'been deprecated in v11 in favor of the new `Layer` component. It will be moved in the next major release.'
+    ),
 
     /**
      * The maximum value.
@@ -119,9 +123,20 @@ export default class Slider extends PureComponent {
     name: PropTypes.string,
 
     /**
+     * Provide an optional function to be called when the input element
+     * loses focus
+     */
+    onBlur: PropTypes.func,
+
+    /**
      * The callback to get notified of change in value.
      */
     onChange: PropTypes.func,
+
+    /**
+     * Provide an optional function to be called when a key is pressed in the number input
+     */
+    onInputKeyUp: PropTypes.func,
 
     /**
      * The callback to get notified of value on handle release.
@@ -129,23 +144,19 @@ export default class Slider extends PureComponent {
     onRelease: PropTypes.func,
 
     /**
+     * Whether the slider should be read-only
+     */
+    readOnly: PropTypes.bool,
+
+    /**
      * `true` to specify if the control is required.
      */
     required: PropTypes.bool,
 
     /**
-     * A value determining how much the value should increase/decrease by moving the thumb by mouse.
+     * A value determining how much the value should increase/decrease by moving the thumb by mouse. If a value other than 1 is provided and the input is *not* hidden, the new step requirement should be added to a visible label. Values outside of the `step` increment will be considered invalid.
      */
     step: PropTypes.number,
-
-    /**
-     * A value determining how much the value should increase/decrease by Shift+arrow keys,
-     * which will be `(max - min) / stepMuliplier`.
-     */
-    stepMuliplier: deprecate(
-      PropTypes.number,
-      ' The `stepMuliplier` prop has been deprecated in favor of `stepMultiplier`. It will be removed in the next major release.'
-    ),
 
     /**
      * A value determining how much the value should increase/decrease by Shift+arrow keys,
@@ -167,15 +178,26 @@ export default class Slider extends PureComponent {
     minLabel: '',
     maxLabel: '',
     inputType: 'number',
-    ariaLabelInput: 'Slider number input',
-    light: false,
+    ariaLabelInput: FeatureFlags.enabled('enable-v11-release')
+      ? undefined
+      : 'Slider number input',
+    readOnly: false,
   };
+
+  static contextType = FeatureFlagContext;
 
   state = {
     value: this.props.value,
     left: 0,
     needsOnRelease: false,
+    isValid: true,
   };
+
+  constructor(props) {
+    super(props);
+    this.thumbRef = React.createRef();
+    this.filledTrackRef = React.createRef();
+  }
 
   /**
    * Sets up initial slider position and value in response to component mount.
@@ -200,12 +222,17 @@ export default class Slider extends PureComponent {
   componentDidUpdate(prevProps, prevState) {
     // Fire onChange event handler if present, if there's a usable value, and
     // if the value is different from the last one
+
+    this.thumbRef.current.style.left = `${this.state.left}%`;
+    this.filledTrackRef.current.style.transform = `translate(0%, -50%) scaleX(${
+      this.state.left / 100
+    })`;
+
     if (
       this.state.value !== '' &&
       prevState.value !== this.state.value &&
       typeof this.props.onChange === 'function'
     ) {
-      // TODO: pass event object as first param (breaking change/feat for v11)
       this.props.onChange({ value: this.state.value });
     }
 
@@ -214,7 +241,6 @@ export default class Slider extends PureComponent {
       this.state.needsOnRelease &&
       typeof this.props.onRelease === 'function'
     ) {
-      // TODO: pass event object as first param (breaking change/feat for v11)
       this.props.onRelease({ value: this.state.value });
       // Reset the flag
       this.setState({ needsOnRelease: false });
@@ -222,7 +248,11 @@ export default class Slider extends PureComponent {
 
     // If value from props does not change, do nothing here.
     // Otherwise, do prop -> state sync without "value capping".
-    if (prevProps.value === this.props.value) {
+    if (
+      prevProps.value === this.props.value &&
+      prevProps.max === this.props.max &&
+      prevProps.min === this.props.min
+    ) {
       return;
     }
     this.setState(
@@ -255,7 +285,7 @@ export default class Slider extends PureComponent {
    */
   onDragStart = (evt) => {
     // Do nothing if component is disabled
-    if (this.props.disabled) {
+    if (this.props.disabled || this.props.readOnly) {
       return;
     }
 
@@ -276,11 +306,11 @@ export default class Slider extends PureComponent {
 
   /**
    * Unregisters "drag" and "drag stop" event handlers and calls sets the flag
-   * inidicating that the `onRelease` callback should be called.
+   * indicating that the `onRelease` callback should be called.
    */
   onDragStop = () => {
     // Do nothing if component is disabled
-    if (this.props.disabled) {
+    if (this.props.disabled || this.props.readOnly) {
       return;
     }
 
@@ -295,7 +325,7 @@ export default class Slider extends PureComponent {
     });
 
     // Set needsOnRelease flag so event fires on next update
-    this.setState({ needsOnRelease: true });
+    this.setState({ needsOnRelease: true, isValid: true });
   };
 
   /**
@@ -306,7 +336,7 @@ export default class Slider extends PureComponent {
    */
   _onDrag = (evt) => {
     // Do nothing if component is disabled or we have no event
-    if (this.props.disabled || !evt) {
+    if (this.props.disabled || this.props.readOnly || !evt) {
       return;
     }
 
@@ -325,7 +355,7 @@ export default class Slider extends PureComponent {
     }
 
     const { value, left } = this.calcValue({ clientX });
-    this.setState({ value, left });
+    this.setState({ value, left, isValid: true });
   };
 
   /**
@@ -345,7 +375,7 @@ export default class Slider extends PureComponent {
    */
   onKeyDown = (evt) => {
     // Do nothing if component is disabled or we don't have a valid event
-    if (this.props.disabled || !('which' in evt)) {
+    if (this.props.disabled || this.props.readOnly || !('which' in evt)) {
       return;
     }
 
@@ -362,8 +392,7 @@ export default class Slider extends PureComponent {
 
     // If shift was held, account for the stepMultiplier
     if (evt.shiftKey) {
-      const stepMultiplier =
-        this.props.stepMultiplier || this.props.stepMuliplier;
+      const stepMultiplier = this.props.stepMultiplier;
       delta *= stepMultiplier;
     }
 
@@ -376,7 +405,8 @@ export default class Slider extends PureComponent {
           ? Math.floor(this.state.value / this.props.step) * this.props.step
           : this.state.value) + delta,
     });
-    this.setState({ value, left });
+
+    this.setState({ value, left, isValid: true });
   };
 
   /**
@@ -386,9 +416,10 @@ export default class Slider extends PureComponent {
    *
    * @param {Event} evt The event.
    */
+
   onChange = (evt) => {
     // Do nothing if component is disabled
-    if (this.props.disabled) {
+    if (this.props.disabled || this.props.readOnly) {
       return;
     }
 
@@ -399,17 +430,39 @@ export default class Slider extends PureComponent {
 
     let targetValue = Number.parseFloat(evt.target.value);
 
-    // Avoid calling calcValue for invaid numbers, but still update the state
+    // Avoid calling calcValue for invalid numbers, but still update the state
     if (isNaN(targetValue)) {
       this.setState({ value: evt.target.value });
     } else {
-      // Recalculate the state's value and update the Slider
       const { value, left } = this.calcValue({
         value: targetValue,
         useRawValue: true,
       });
-      this.setState({ value, left, needsOnRelease: true });
+      this.setState({
+        value,
+        left,
+      });
     }
+  };
+
+  /**
+   * Checks for validity of input value after clicking out of the input. It also
+   * Handles state change to isValid state.
+   *
+   * @param {Event} evt The event.
+   */
+  onBlur = (evt) => {
+    // Do nothing if we have no valid event, target, or value
+    if (!evt || !('target' in evt) || typeof evt.target.value !== 'string') {
+      return;
+    }
+
+    // determine validity of input change after clicking out of input
+    const validity = evt.target.checkValidity();
+    const { value } = evt.target;
+
+    this.setState({ isValid: validity });
+    this.props.onBlur?.({ value });
   };
 
   /**
@@ -452,7 +505,8 @@ export default class Slider extends PureComponent {
       if (value == null) {
         value = this.state.value;
       }
-      leftPercent = (value - this.props.min) / range;
+      // prevent NaN calculation if the range is 0
+      leftPercent = range === 0 ? 0 : (value - this.props.min) / range;
     }
 
     if (useRawValue) {
@@ -475,6 +529,25 @@ export default class Slider extends PureComponent {
     return { value: steppedValue, left: steppedPercent * 100 };
   };
 
+  // syncs invalid state and prop
+  static getDerivedStateFromProps(props, state) {
+    const { isValid } = state;
+    // will override state in favor of invalid prop
+    if (props.invalid === true && isValid === true) {
+      return {
+        isValid: false,
+      };
+    }
+
+    if (props.invalid === false && isValid === false) {
+      return {
+        isValid: true,
+      };
+    }
+    //if invalid prop is not provided, state will remain the same
+    return null;
+  }
+
   render() {
     const {
       ariaLabelInput,
@@ -490,110 +563,129 @@ export default class Slider extends PureComponent {
       formatLabel = defaultFormatLabel,
       labelText,
       step,
-      stepMuliplier, // eslint-disable-line no-unused-vars
       stepMultiplier, // eslint-disable-line no-unused-vars
       inputType,
       required,
       disabled,
       name,
       light,
+      readOnly,
       ...other
     } = this.props;
 
     delete other.onRelease;
+    delete other.invalid;
 
-    const { value, left } = this.state;
+    const { value, isValid } = this.state;
 
-    const labelClasses = classNames(`${prefix}--label`, {
-      [`${prefix}--label--disabled`]: disabled,
-    });
+    const scope = this.context;
+    let enabled;
 
-    const sliderClasses = classNames(
-      `${prefix}--slider`,
-      { [`${prefix}--slider--disabled`]: disabled },
-      className
-    );
-
-    const inputClasses = classNames(
-      `${prefix}--text-input`,
-      `${prefix}--slider-text-input`,
-      {
-        [`${prefix}--text-input--light`]: light,
-        [`${prefix}--text-input--invalid`]: this.props.invalid,
-      }
-    );
-
-    const filledTrackStyle = {
-      transform: `translate(0%, -50%) scaleX(${left / 100})`,
-    };
-    const thumbStyle = {
-      left: `${left}%`,
-    };
-    const hiddenInputStyle = {
-      display: 'none',
-    };
+    if (scope.enabled) {
+      enabled = scope.enabled('enable-v11-release');
+    }
 
     return (
-      <div className={`${prefix}--form-item`}>
-        <label htmlFor={id} className={labelClasses}>
-          {labelText}
-        </label>
-        <div className={`${prefix}--slider-container`}>
-          <span className={`${prefix}--slider__range-label`}>
-            {formatLabel(min, minLabel)}
-          </span>
-          <div
-            className={sliderClasses}
-            ref={(node) => {
-              this.element = node;
-            }}
-            onMouseDown={this.onDragStart}
-            onTouchStart={this.onDragStart}
-            onKeyDown={this.onKeyDown}
-            role="presentation"
-            tabIndex={-1}
-            {...other}>
+      <PrefixContext.Consumer>
+        {(prefix) => {
+          const labelId = `${id}-label`;
+          const labelClasses = classNames(`${prefix}--label`, {
+            [`${prefix}--label--disabled`]: disabled,
+          });
+
+          const sliderClasses = classNames(
+            `${prefix}--slider`,
+            { [`${prefix}--slider--disabled`]: disabled },
+            { [`${prefix}--slider--readonly`]: readOnly },
+            [enabled ? null : className]
+          );
+
+          const inputClasses = classNames(
+            `${prefix}--text-input`,
+            `${prefix}--slider-text-input`,
+            {
+              [`${prefix}--text-input--light`]: light,
+              [`${prefix}--text-input--invalid`]: isValid === false,
+              [`${prefix}--slider-text-input--hidden`]: hideTextInput,
+            }
+          );
+
+          return (
             <div
-              className={`${prefix}--slider__thumb`}
-              role="slider"
-              id={id}
-              tabIndex={0}
-              aria-valuemax={max}
-              aria-valuemin={min}
-              aria-valuenow={value}
-              style={thumbStyle}
-            />
-            <div
-              className={`${prefix}--slider__track`}
-              ref={(node) => {
-                this.track = node;
-              }}
-            />
-            <div
-              className={`${prefix}--slider__filled-track`}
-              style={filledTrackStyle}
-            />
-          </div>
-          <span className={`${prefix}--slider__range-label`}>
-            {formatLabel(max, maxLabel)}
-          </span>
-          <input
-            type={hideTextInput ? 'hidden' : inputType}
-            style={hideTextInput ? hiddenInputStyle : null}
-            id={`${id}-input-for-slider`}
-            name={name}
-            className={inputClasses}
-            value={value}
-            aria-label={ariaLabelInput}
-            disabled={disabled}
-            required={required}
-            min={min}
-            max={max}
-            step={step}
-            onChange={this.onChange}
-          />
-        </div>
-      </div>
+              className={
+                enabled
+                  ? classNames(`${prefix}--form-item`, className)
+                  : `${prefix}--form-item`
+              }>
+              <label htmlFor={id} className={labelClasses} id={labelId}>
+                {labelText}
+              </label>
+              <div className={`${prefix}--slider-container`}>
+                <span className={`${prefix}--slider__range-label`}>
+                  {formatLabel(min, minLabel)}
+                </span>
+                <div
+                  className={sliderClasses}
+                  ref={(node) => {
+                    this.element = node;
+                  }}
+                  onMouseDown={this.onDragStart}
+                  onTouchStart={this.onDragStart}
+                  onKeyDown={this.onKeyDown}
+                  role="presentation"
+                  tabIndex={-1}
+                  data-invalid={isValid ? null : true}
+                  {...other}>
+                  <div
+                    className={`${prefix}--slider__thumb`}
+                    role="slider"
+                    id={id}
+                    tabIndex={!readOnly ? 0 : -1}
+                    aria-valuemax={max}
+                    aria-valuemin={min}
+                    aria-valuenow={value}
+                    aria-labelledby={labelId}
+                    ref={this.thumbRef}
+                  />
+                  <div
+                    className={`${prefix}--slider__track`}
+                    ref={(node) => {
+                      this.track = node;
+                    }}
+                  />
+                  <div
+                    className={`${prefix}--slider__filled-track`}
+                    ref={this.filledTrackRef}
+                  />
+                </div>
+                <span className={`${prefix}--slider__range-label`}>
+                  {formatLabel(max, maxLabel)}
+                </span>
+                <input
+                  type={hideTextInput ? 'hidden' : inputType}
+                  id={`${id}-input-for-slider`}
+                  name={name}
+                  className={inputClasses}
+                  value={value}
+                  aria-labelledby={!ariaLabelInput ? labelId : null}
+                  aria-label={ariaLabelInput ? ariaLabelInput : null}
+                  disabled={disabled}
+                  required={required}
+                  min={min}
+                  max={max}
+                  step={step}
+                  onChange={this.onChange}
+                  onBlur={this.onBlur}
+                  onKeyUp={this.onInputKeyUp}
+                  data-invalid={isValid ? null : true}
+                  aria-invalid={isValid ? null : true}
+                  readOnly={readOnly}
+                />
+              </div>
+            </div>
+          );
+        }}
+      </PrefixContext.Consumer>
     );
   }
 }

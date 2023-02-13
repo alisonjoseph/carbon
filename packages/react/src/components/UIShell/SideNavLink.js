@@ -5,7 +5,6 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-import { settings } from 'carbon-components';
 import cx from 'classnames';
 import PropTypes from 'prop-types';
 import React from 'react';
@@ -13,19 +12,20 @@ import Link, { LinkPropTypes } from './Link';
 import SideNavIcon from './SideNavIcon';
 import SideNavItem from './SideNavItem';
 import SideNavLinkText from './SideNavLinkText';
+import { usePrefix } from '../../internal/usePrefix';
 
-const { prefix } = settings;
-
-const SideNavLink = ({
-  className: customClassName,
-  children,
-  renderIcon: IconElement,
-  isActive,
-  large,
-  // eslint-disable-next-line no-unused-vars
-  isSideNavExpanded,
-  ...rest
-}) => {
+const SideNavLink = React.forwardRef(function SideNavLink(
+  {
+    children,
+    className: customClassName,
+    renderIcon: IconElement,
+    isActive,
+    large = false,
+    ...rest
+  },
+  ref
+) {
+  const prefix = usePrefix();
   const className = cx({
     [`${prefix}--side-nav__link`]: true,
     [`${prefix}--side-nav__link--current`]: isActive,
@@ -34,7 +34,7 @@ const SideNavLink = ({
 
   return (
     <SideNavItem large={large}>
-      <Link {...rest} className={className}>
+      <Link {...rest} className={className} ref={ref}>
         {IconElement && (
           <SideNavIcon small>
             <IconElement />
@@ -44,8 +44,9 @@ const SideNavLink = ({
       </Link>
     </SideNavItem>
   );
-};
+});
 
+SideNavLink.displayName = 'SideNavLink';
 SideNavLink.propTypes = {
   ...LinkPropTypes,
 
@@ -60,10 +61,9 @@ SideNavLink.propTypes = {
   className: PropTypes.string,
 
   /**
-   * Property to indicate if the side nav container is open (or not). Use to
-   * keep local state and styling in step with the SideNav expansion state.
+   * Specify whether the link is the current page
    */
-  isSideNavExpanded: PropTypes.bool,
+  isActive: PropTypes.bool,
 
   /**
    * Specify if this is a large variation of the SideNavLink
@@ -76,11 +76,7 @@ SideNavLink.propTypes = {
   renderIcon: PropTypes.oneOfType([PropTypes.func, PropTypes.object]),
 };
 
-SideNavLink.defaultProps = {
-  element: 'a',
-  large: false,
-};
-
+// eslint-disable-next-line react/display-name
 export const createCustomSideNavLink = (element) => (props) => {
   return <SideNavLink element={element} {...props} />;
 };

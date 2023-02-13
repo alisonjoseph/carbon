@@ -4,143 +4,216 @@
  * This source code is licensed under the Apache-2.0 license found in the
  * LICENSE file in the root directory of this source tree.
  */
-import { adjustLightness } from './tools';
 
 import {
   // Blue
-  blue30,
   blue40,
-  blue50,
   blue60,
   blue70,
-  blue80,
 
   // Gray
   gray10,
   gray30,
   gray40,
   gray50,
+  gray50Hover,
   gray60,
+  gray60Hover,
   gray70,
+  gray70Hover,
   gray80,
   gray90,
   gray100,
 
   // Support
+  blue30,
+  blue50,
   green40,
   green50,
-  yellow,
+  yellow30,
+  orange40,
   red30,
   red40,
   red60,
-  red80,
   purple40,
+  purple50,
 
   // Constants
   white,
+  black,
 
   // Tools
   rgba,
+  gray90Hover,
+  gray10Hover,
+  gray80Hover,
 } from '@carbon/colors';
+import { adjustAlpha } from './tools';
 
-export const interactive01 = blue60;
-export const interactive02 = gray60;
-export const interactive03 = white;
-export const interactive04 = blue50;
+// Background
+export const background = gray90;
+export const backgroundInverse = gray10;
+export const backgroundBrand = blue60;
+export const backgroundActive = adjustAlpha(gray50, 0.4);
+export const backgroundHover = adjustAlpha(gray50, 0.16);
+export const backgroundInverseHover = gray10Hover;
+export const backgroundSelected = adjustAlpha(gray50, 0.24);
+export const backgroundSelectedHover = adjustAlpha(gray50, 0.32);
 
-export const uiBackground = gray90;
+// Layer
+// layer-01
+export const layer01 = gray80;
+export const layerActive01 = gray60;
+export const layerHover01 = gray80Hover;
+export const layerSelected01 = gray70;
+export const layerSelectedHover01 = gray70Hover;
 
-export const ui01 = gray80;
-export const ui02 = gray70;
-export const ui03 = gray70;
-export const ui04 = gray50;
-export const ui05 = gray10;
+// layer-02
+export const layer02 = gray70;
+export const layerActive02 = gray50;
+export const layerHover02 = gray70Hover;
+export const layerSelected02 = gray60;
+export const layerSelectedHover02 = gray60Hover;
 
-export const text01 = gray10;
-export const text02 = gray30;
-export const text03 = gray60;
-export const text04 = white;
-export const text05 = gray50;
-export const textError = red30;
+// layer-03
+export const layer03 = gray60;
+export const layerActive03 = gray80;
+export const layerHover03 = gray60Hover;
+export const layerSelected03 = gray70;
+export const layerSelectedHover03 = gray70Hover;
 
-export const icon01 = gray10;
-export const icon02 = gray30;
-export const icon03 = white;
+// layer
+export const layerSelectedInverse = gray10;
+export const layerSelectedDisabled = gray40;
 
-export const link01 = blue40;
+// layer-accent-01
+export const layerAccent01 = gray70;
+export const layerAccentActive01 = gray50;
+export const layerAccentHover01 = gray70Hover;
 
-export const inverseLink = blue60;
+// layer-accent-02
+export const layerAccent02 = gray60;
+export const layerAccentActive02 = gray80;
+export const layerAccentHover02 = gray60Hover;
 
+// layer-accent-03
+export const layerAccent03 = gray50;
+export const layerAccentActive03 = gray70;
+export const layerAccentHover03 = gray50Hover;
+
+// Field
+// field-01
 export const field01 = gray80;
+export const fieldHover01 = gray80Hover;
+
+// field-02
 export const field02 = gray70;
+export const fieldHover02 = gray70Hover;
 
-export const inverse01 = gray100;
-export const inverse02 = gray10;
+// field-03
+export const field03 = gray60;
+export const fieldHover03 = gray60Hover;
 
-export const support01 = red40;
-export const support02 = green40;
-export const support03 = yellow;
-export const support04 = blue50;
+// Border
+// border-subtle-00
+export const borderSubtle00 = gray70;
 
-export const inverseSupport01 = red60;
-export const inverseSupport02 = green50;
-export const inverseSupport03 = yellow;
-export const inverseSupport04 = blue60;
+// border-subtle-01
+export const borderSubtle01 = gray70;
+export const borderSubtleSelected01 = gray60;
 
-export const overlay01 = rgba(gray100, 0.7);
+// border-subtle-02
+export const borderSubtle02 = gray60;
+export const borderSubtleSelected02 = gray50;
 
-export const danger = red60;
+// border-subtle-03
+export const borderSubtle03 = gray50;
+export const borderSubtleSelected03 = gray40;
 
-// Interaction states
+// border-strong
+export const borderStrong01 = gray50;
+export const borderStrong02 = gray40;
+export const borderStrong03 = gray30;
+
+// border-tile
+export const borderTile01 = gray60;
+export const borderTile02 = gray50;
+export const borderTile03 = gray40;
+
+// border-inverse
+export const borderInverse = gray10;
+
+// border-interactive
+export const borderInteractive = blue50;
+
+// border
+export const borderDisabled = adjustAlpha(gray50, 0.5);
+
+// Text
+export const textPrimary = gray10;
+export const textSecondary = gray30;
+export const textPlaceholder = adjustAlpha(textPrimary, 0.4);
+export const textHelper = gray30;
+export const textError = red30;
+export const textInverse = gray100;
+export const textOnColor = white;
+export const textOnColorDisabled = adjustAlpha(textOnColor, 0.25);
+export const textDisabled = adjustAlpha(textPrimary, 0.25);
+
+// Link
+export const linkPrimary = blue40;
+export const linkPrimaryHover = blue30;
+export const linkSecondary = blue30;
+export const linkInverse = blue60;
+export const linkVisited = purple40;
+export const linkInverseActive = gray100;
+export const linkInverseHover = blue70;
+
+// Icon
+export const iconPrimary = gray10;
+export const iconSecondary = gray30;
+export const iconInverse = gray100;
+export const iconOnColor = white;
+export const iconOnColorDisabled = adjustAlpha(iconOnColor, 0.25);
+export const iconDisabled = adjustAlpha(iconPrimary, 0.25);
+
+// Support
+export const supportError = red40;
+export const supportSuccess = green40;
+export const supportWarning = yellow30;
+export const supportInfo = blue50;
+export const supportErrorInverse = red60;
+export const supportSuccessInverse = green50;
+export const supportWarningInverse = yellow30;
+export const supportInfoInverse = blue70;
+export const supportCautionMinor = yellow30;
+export const supportCautionMajor = orange40;
+export const supportCautionUndefined = purple50;
+
+// Focus
 export const focus = white;
-export const inverseFocusUi = blue60;
+export const focusInset = gray100;
+export const focusInverse = blue60;
 
-export const hoverPrimary = '#0353e9';
-export const activePrimary = blue80;
+// Skeleton
+export const skeletonBackground = gray90Hover;
+export const skeletonElement = gray70;
 
-export const hoverPrimaryText = blue30;
-
-export const hoverSecondary = '#606060';
-export const activeSecondary = gray80;
-
-export const hoverTertiary = gray10;
-export const activeTertiary = gray30;
-
-export const hoverUI = '#4c4c4c';
-export const activeUI = gray60;
-export const selectedUI = gray70;
-export const selectedLightUI = gray60;
-export const inverseHoverUI = '#e5e5e5';
-
-export const hoverSelectedUI = '#656565';
-
-export const hoverDanger = adjustLightness(danger, -8);
-export const activeDanger = red80;
-
-export const hoverRow = '#4c4c4c';
-
-export const visitedLink = purple40;
-
-export const disabled01 = gray80;
-export const disabled02 = gray60;
-export const disabled03 = gray40;
-
+// Misc
+export const interactive = blue50;
 export const highlight = blue70;
-
-export const decorative01 = gray60;
-
-export const hoverLightUI = '#6f6f6f';
-
-export const buttonSeparator = '#161616';
-
-export const skeleton01 = '#353535';
-export const skeleton02 = gray70;
+export const overlay = rgba(black, 0.65);
+export const toggleOff = gray50;
+export const shadow = rgba(black, 0.8);
 
 export {
   // Type
   caption01,
+  caption02,
   label01,
+  label02,
   helperText01,
+  helperText02,
   bodyShort01,
   bodyLong01,
   bodyShort02,
@@ -183,33 +256,25 @@ export {
   spacing10,
   spacing11,
   spacing12,
+  spacing13,
   // Fluid spacing
   fluidSpacing01,
   fluidSpacing02,
   fluidSpacing03,
   fluidSpacing04,
-  // Layout
-  layout01,
-  layout02,
-  layout03,
-  layout04,
-  layout05,
-  layout06,
-  layout07,
   // Containers
   container01,
   container02,
   container03,
   container04,
   container05,
+  sizeXSmall,
+  sizeSmall,
+  sizeMedium,
+  sizeLarge,
+  sizeXLarge,
+  size2XLarge,
   // Icon sizes
   iconSize01,
   iconSize02,
 } from './white';
-
-// Deprecated ☠️
-export const brand01 = interactive01;
-export const brand02 = interactive02;
-export const brand03 = interactive03;
-export const active01 = activeUI;
-export const hoverField = hoverUI;

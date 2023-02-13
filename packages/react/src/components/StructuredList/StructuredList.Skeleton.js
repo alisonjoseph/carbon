@@ -8,11 +8,10 @@
 import PropTypes from 'prop-types';
 import React from 'react';
 import cx from 'classnames';
-import { settings } from 'carbon-components';
-
-const { prefix } = settings;
+import { usePrefix } from '../../internal/usePrefix';
 
 const StructuredListSkeleton = ({ rowCount, border, className, ...rest }) => {
+  const prefix = usePrefix();
   const StructuredListSkeletonClasses = cx(className, {
     [`${prefix}--skeleton`]: true,
     [`${prefix}--structured-list`]: true,
@@ -31,7 +30,7 @@ const StructuredListSkeleton = ({ rowCount, border, className, ...rest }) => {
   }
 
   return (
-    <section className={StructuredListSkeletonClasses} {...rest}>
+    <div className={StructuredListSkeletonClasses} {...rest}>
       <div className={`${prefix}--structured-list-thead`}>
         <div
           className={`${prefix}--structured-list-row ${prefix}--structured-list-row--header-row`}>
@@ -47,7 +46,7 @@ const StructuredListSkeleton = ({ rowCount, border, className, ...rest }) => {
         </div>
       </div>
       <div className={`${prefix}--structured-list-tbody`}>{rows}</div>
-    </section>
+    </div>
   );
 };
 

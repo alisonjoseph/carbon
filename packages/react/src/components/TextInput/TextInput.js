@@ -6,55 +6,84 @@
  */
 
 import PropTypes from 'prop-types';
-import React, { useContext } from 'react';
+import React, { useContext, useState } from 'react';
 import classNames from 'classnames';
-import { settings } from 'carbon-components';
-import { WarningFilled16, WarningAltFilled16 } from '@carbon/icons-react';
+import { useNormalizedInputProps } from '../../internal/useNormalizedInputProps';
 import PasswordInput from './PasswordInput';
 import ControlledPasswordInput from './ControlledPasswordInput';
+import deprecate from '../../prop-types/deprecate';
 import { textInputProps } from './util';
 import { FormContext } from '../FluidForm';
+import { useFeatureFlag } from '../FeatureFlags';
+import * as FeatureFlags from '@carbon/feature-flags';
+import { usePrefix } from '../../internal/usePrefix';
+import { useAnnouncer } from '../../internal/useAnnouncer';
 
-const { prefix } = settings;
 const TextInput = React.forwardRef(function TextInput(
   {
-    labelText,
-    className = `${prefix}--text__input`,
-    id,
-    placeholder,
-    type,
-    onChange,
-    onClick,
+    className,
+    disabled = false,
+    helperText,
     hideLabel,
+    id,
+    inline = false,
+    invalid = false,
+    invalidText,
+    labelText,
+    light,
+    onChange = () => {},
+    onClick = () => {},
+    placeholder,
+    readOnly,
+    size = 'md',
+    type = 'text',
+    warn = false,
+    warnText,
+    enableCounter = false,
+    maxCount,
+    ...rest
+  },
+  ref
+) {
+  const prefix = usePrefix();
+
+  const enabled = useFeatureFlag('enable-v11-release');
+
+  const { defaultValue, value } = rest;
+  const [textCount, setTextCount] = useState(
+    defaultValue?.length || value?.length || 0
+  );
+
+  const normalizedProps = useNormalizedInputProps({
+    id,
+    readOnly,
+    disabled,
     invalid,
     invalidText,
     warn,
     warnText,
-    helperText,
-    light,
-    size,
-    inline,
-    ...other
-  },
-  ref
-) {
-  const errorId = id + '-error-msg';
-  const warnId = id + '-warn-msg';
-  const textInputClasses = classNames(`${prefix}--text-input`, className, {
-    [`${prefix}--text-input--light`]: light,
-    [`${prefix}--text-input--invalid`]: invalid,
-    [`${prefix}--text-input--warn`]: warn,
-    [`${prefix}--text-input--${size}`]: size,
   });
+
+  const textInputClasses = classNames(
+    `${prefix}--text-input`,
+    [enabled ? null : className],
+    {
+      [`${prefix}--text-input--light`]: light,
+      [`${prefix}--text-input--invalid`]: normalizedProps.invalid,
+      [`${prefix}--text-input--warning`]: normalizedProps.warn,
+      [`${prefix}--text-input--${size}`]: size,
+    }
+  );
   const sharedTextInputProps = {
     id,
     onChange: (evt) => {
-      if (!other.disabled) {
+      if (!normalizedProps.disabled) {
+        setTextCount(evt.target.value?.length);
         onChange(evt);
       }
     },
     onClick: (evt) => {
-      if (!other.disabled) {
+      if (!normalizedProps.disabled) {
         onClick(evt);
       }
     },
@@ -63,24 +92,39 @@ const TextInput = React.forwardRef(function TextInput(
     ref,
     className: textInputClasses,
     title: placeholder,
-    ...other,
+    disabled: normalizedProps.disabled,
+    readOnly,
+    ['aria-describedby']: helperText && normalizedProps.helperId,
+    ...rest,
   };
+
+  if (enableCounter) {
+    sharedTextInputProps.maxLength = maxCount;
+  }
+
   const inputWrapperClasses = classNames(
-    `${prefix}--form-item`,
+    [
+      enabled
+        ? classNames(`${prefix}--form-item`, className)
+        : `${prefix}--form-item`,
+    ],
     `${prefix}--text-input-wrapper`,
     {
+      [`${prefix}--text-input-wrapper--readonly`]: readOnly,
       [`${prefix}--text-input-wrapper--light`]: light,
       [`${prefix}--text-input-wrapper--inline`]: inline,
+      [`${prefix}--text-input-wrapper--inline--invalid`]:
+        inline && normalizedProps.invalid,
     }
   );
   const labelClasses = classNames(`${prefix}--label`, {
     [`${prefix}--visually-hidden`]: hideLabel,
-    [`${prefix}--label--disabled`]: other.disabled,
+    [`${prefix}--label--disabled`]: normalizedProps.disabled,
     [`${prefix}--label--inline`]: inline,
     [`${prefix}--label--inline--${size}`]: inline && !!size,
   });
   const helperTextClasses = classNames(`${prefix}--form__helper-text`, {
-    [`${prefix}--form__helper-text--disabled`]: other.disabled,
+    [`${prefix}--form__helper-text--disabled`]: normalizedProps.disabled,
     [`${prefix}--form__helper-text--inline`]: inline,
   });
   const fieldOuterWrapperClasses = classNames(
@@ -89,96 +133,115 @@ const TextInput = React.forwardRef(function TextInput(
       [`${prefix}--text-input__field-outer-wrapper--inline`]: inline,
     }
   );
+  const fieldWrapperClasses = classNames(
+    `${prefix}--text-input__field-wrapper`,
+    {
+      [`${prefix}--text-input__field-wrapper--warning`]: normalizedProps.warn,
+    }
+  );
+  const iconClasses = classNames({
+    [`${prefix}--text-input__invalid-icon`]:
+      normalizedProps.invalid || normalizedProps.warn,
+    [`${prefix}--text-input__invalid-icon--warning`]: normalizedProps.warn,
+  });
+
+  const counterClasses = classNames(`${prefix}--label`, {
+    [`${prefix}--label--disabled`]: disabled,
+    [`${prefix}--text-input__label-counter`]: true,
+  });
+
+  const counter =
+    enableCounter && maxCount ? (
+      <div className={counterClasses}>{`${textCount}/${maxCount}`}</div>
+    ) : null;
+
   const label = labelText ? (
     <label htmlFor={id} className={labelClasses}>
       {labelText}
     </label>
   ) : null;
-  let error = null;
-  if (invalid) {
-    error = (
-      <div className={`${prefix}--form-requirement`} id={errorId}>
-        {invalidText}
-      </div>
-    );
-  } else if (warn) {
-    error = (
-      <div className={`${prefix}--form-requirement`} id={warnId}>
-        {warnText}
-      </div>
-    );
-  }
+
+  const labelWrapper = (
+    <div className={`${prefix}--text-input__label-wrapper`}>
+      {label}
+      {counter}
+    </div>
+  );
+
+  const helper = helperText ? (
+    <div id={normalizedProps.helperId} className={helperTextClasses}>
+      {helperText}
+    </div>
+  ) : null;
+
   const input = (
     <input
       {...textInputProps({
-        invalid,
         sharedTextInputProps,
-        errorId,
-        warn,
-        warnId,
+        invalid: normalizedProps.invalid,
+        invalidId: normalizedProps.invalidId,
+        warn: normalizedProps.warn,
+        warnId: normalizedProps.warnId,
       })}
     />
   );
-  const helper = helperText ? (
-    <div className={helperTextClasses}>{helperText}</div>
-  ) : null;
 
   const { isFluid } = useContext(FormContext);
+  let ariaAnnouncement = useAnnouncer(textCount, maxCount);
 
   return (
     <div className={inputWrapperClasses}>
       {!inline ? (
-        label
+        labelWrapper
       ) : (
         <div className={`${prefix}--text-input__label-helper-wrapper`}>
-          {label}
-          {!isFluid && helper}
+          {labelWrapper}
+          {!isFluid && (normalizedProps.validation || helper)}
         </div>
       )}
       <div className={fieldOuterWrapperClasses}>
         <div
-          className={`${prefix}--text-input__field-wrapper`}
-          data-invalid={invalid || null}
-          data-warn={warn || null}>
-          {invalid && (
-            <WarningFilled16
-              className={`${prefix}--text-input__invalid-icon`}
-            />
-          )}
-          {!invalid && warn && (
-            <WarningAltFilled16
-              className={`${prefix}--text-input__invalid-icon ${prefix}--text-input__invalid-icon--warning`}
-            />
+          className={fieldWrapperClasses}
+          data-invalid={normalizedProps.invalid || null}>
+          {normalizedProps.icon && (
+            <normalizedProps.icon className={iconClasses} />
           )}
           {input}
+          <span className={`${prefix}--text-input__counter-alert`} role="alert">
+            {ariaAnnouncement}
+          </span>
           {isFluid && <hr className={`${prefix}--text-input__divider`} />}
-          {/* <hr className={`${prefix}--text-input__divider`} /> */}
-          {isFluid && !inline && error}
+          {isFluid && !inline && normalizedProps.validation}
         </div>
-        {!isFluid && error}
-        {!invalid && !warn && !isFluid && !inline && helper}
+        {!isFluid && !inline && (normalizedProps.validation || helper)}
       </div>
     </div>
   );
 });
 
+TextInput.displayName = 'TextInput';
 TextInput.PasswordInput = PasswordInput;
 TextInput.ControlledPasswordInput = ControlledPasswordInput;
 TextInput.propTypes = {
   /**
-   * Specify an optional className to be applied to the <input> node
+   * Specify an optional className to be applied to the `<input>` node
    */
   className: PropTypes.string,
 
   /**
-   * Optionally provide the default value of the <input>
+   * Optionally provide the default value of the `<input>`
    */
   defaultValue: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
 
   /**
-   * Specify whether the <input> should be disabled
+   * Specify whether the `<input>` should be disabled
    */
   disabled: PropTypes.bool,
+
+  /**
+   * Specify whether to display the character counter
+   */
+  enableCounter: PropTypes.bool,
 
   /**
    * Provide text that is used alongside the control label for additional help
@@ -191,7 +254,7 @@ TextInput.propTypes = {
   hideLabel: PropTypes.bool,
 
   /**
-   * Specify a custom `id` for the <input>
+   * Specify a custom `id` for the `<input>`
    */
   id: PropTypes.string.isRequired,
 
@@ -208,7 +271,7 @@ TextInput.propTypes = {
   /**
    * Provide the text that is displayed when the control is in an invalid state
    */
-  invalidText: PropTypes.string,
+  invalidText: PropTypes.node,
 
   /**
    * Provide the text that will be read by a screen reader when visiting this
@@ -217,39 +280,56 @@ TextInput.propTypes = {
   labelText: PropTypes.node.isRequired,
 
   /**
-   * `true` to use the light version.
+   * `true` to use the light version. For use on $ui-01 backgrounds only.
+   * Don't use this to make tile background color same as container background color.
    */
-  light: PropTypes.bool,
+  light: deprecate(
+    PropTypes.bool,
+    'The `light` prop for `TextInput` has ' +
+      'been deprecated in favor of the new `Layer` component. It will be removed in the next major release.'
+  ),
 
   /**
-   * Optionally provide an `onChange` handler that is called whenever <input>
+   * Max character count allowed for the input. This is needed in order for enableCounter to display
+   */
+  maxCount: PropTypes.number,
+
+  /**
+   * Optionally provide an `onChange` handler that is called whenever `<input>`
    * is updated
    */
   onChange: PropTypes.func,
 
   /**
    * Optionally provide an `onClick` handler that is called whenever the
-   * <input> is clicked
+   * `<input>` is clicked
    */
   onClick: PropTypes.func,
 
   /**
-   * Specify the placeholder attribute for the <input>
+   * Specify the placeholder attribute for the `<input>`
    */
   placeholder: PropTypes.string,
 
   /**
-   * Specify the size of the Text Input. Currently supports either `sm` or `xl` as an option.
+   * Whether the input should be read-only
    */
-  size: PropTypes.oneOf(['sm', 'xl']),
+  readOnly: PropTypes.bool,
 
   /**
-   * Specify the type of the <input>
+   * Specify the size of the Text Input. Currently supports the following:
+   */
+  size: FeatureFlags.enabled('enable-v11-release')
+    ? PropTypes.oneOf(['sm', 'md', 'lg'])
+    : PropTypes.oneOf(['sm', 'md', 'lg', 'xl']),
+
+  /**
+   * Specify the type of the `<input>`
    */
   type: PropTypes.string,
 
   /**
-   * Specify the value of the <input>
+   * Specify the value of the `<input>`
    */
   value: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
 
@@ -257,24 +337,11 @@ TextInput.propTypes = {
    * Specify whether the control is currently in warning state
    */
   warn: PropTypes.bool,
+
   /**
    * Provide the text that is displayed when the control is in warning state
    */
-  warnText: PropTypes.string,
-};
-
-TextInput.defaultProps = {
-  disabled: false,
-  type: 'text',
-  onChange: () => {},
-  onClick: () => {},
-  invalid: false,
-  invalidText: '',
-  warn: false,
-  warnText: '',
-  helperText: '',
-  light: false,
-  inline: false,
+  warnText: PropTypes.node,
 };
 
 export default TextInput;

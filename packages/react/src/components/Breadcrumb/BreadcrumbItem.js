@@ -8,19 +8,22 @@
 import PropTypes from 'prop-types';
 import React from 'react';
 import cx from 'classnames';
-import { settings } from 'carbon-components';
 import Link from '../Link';
+import { OverflowMenuHorizontal } from '@carbon/icons-react';
+import { usePrefix } from '../../internal/usePrefix';
 
-const { prefix } = settings;
-
-const BreadcrumbItem = ({
-  'aria-current': ariaCurrent,
-  children,
-  className: customClassName,
-  href,
-  isCurrentPage,
-  ...rest
-}) => {
+const BreadcrumbItem = React.forwardRef(function BreadcrumbItem(
+  {
+    'aria-current': ariaCurrent,
+    children,
+    className: customClassName,
+    href,
+    isCurrentPage,
+    ...rest
+  },
+  ref
+) {
+  const prefix = usePrefix();
   const className = cx({
     [`${prefix}--breadcrumb-item`]: true,
     // We set the current class only if `isCurrentPage` is passed in and we do
@@ -30,25 +33,50 @@ const BreadcrumbItem = ({
     [customClassName]: !!customClassName,
   });
 
-  if (typeof children === 'string' && href) {
+  if (
+    children.type &&
+    children.type.displayName !== undefined &&
+    children.type.displayName.includes('OverflowMenu')
+  ) {
+    const horizontalOverflowIcon = (
+      <OverflowMenuHorizontal className={`${prefix}--overflow-menu__icon`} />
+    );
     return (
       <li className={className} {...rest}>
-        <Link href={href} aria-current={ariaCurrent}>
-          {children}
-        </Link>
+        {React.cloneElement(children, {
+          menuOptionsClass: `${prefix}--breadcrumb-menu-options`,
+          menuOffset: { top: 10, left: 59 },
+          renderIcon: () => horizontalOverflowIcon,
+        })}
+      </li>
+    );
+  }
+
+  if (typeof children === 'string') {
+    return (
+      <li className={className} ref={ref} {...rest}>
+        {href ? (
+          <Link href={href} aria-current={ariaCurrent}>
+            {children}
+          </Link>
+        ) : (
+          <span className={`${prefix}--link`}>{children}</span>
+        )}
       </li>
     );
   }
 
   return (
-    <li className={className} {...rest}>
+    <li className={className} ref={ref} {...rest}>
       {React.cloneElement(children, {
         'aria-current': ariaCurrent,
-        className: `${prefix}--link`,
+        className: cx(`${prefix}--link`, children.props.className),
       })}
     </li>
   );
-};
+});
+
+BreadcrumbItem.displayName = 'BreadcrumbItem';
 
 BreadcrumbItem.propTypes = {
   'aria-current': PropTypes.oneOfType([PropTypes.string, PropTypes.bool]),

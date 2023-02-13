@@ -8,11 +8,10 @@
 import cx from 'classnames';
 import PropTypes from 'prop-types';
 import React from 'react';
-import { settings } from 'carbon-components';
 import Button from '../Button';
 import TableActionList from './TableActionList';
-
-const { prefix } = settings;
+import { Text } from '../Text';
+import { usePrefix } from '../../internal/usePrefix';
 
 const translationKeys = {
   'carbon.table.batch.cancel': 'Cancel',
@@ -36,6 +35,8 @@ const TableBatchActions = ({
   translateWithId: t,
   ...rest
 }) => {
+  const [isScrolling, setIsScrolling] = React.useState();
+  const prefix = usePrefix();
   const batchActionsClasses = cx(
     {
       [`${prefix}--batch-actions`]: true,
@@ -44,15 +45,25 @@ const TableBatchActions = ({
     className
   );
 
+  const batchSummaryClasses = cx(`${prefix}--batch-summary`, {
+    [`${prefix}--batch-summary__scroll`]: isScrolling,
+  });
+
   return (
-    <div {...rest} className={batchActionsClasses}>
-      <div className={`${prefix}--batch-summary`}>
+    <div
+      onScroll={() => {
+        setIsScrolling(!isScrolling);
+      }}
+      aria-hidden={!shouldShowBatchActions}
+      className={batchActionsClasses}
+      {...rest}>
+      <div className={batchSummaryClasses}>
         <p className={`${prefix}--batch-summary__para`}>
-          <span>
-            {totalSelected > 1
+          <Text as="span">
+            {totalSelected > 1 || totalSelected === 0
               ? t('carbon.table.batch.items.selected', { totalSelected })
               : t('carbon.table.batch.item.selected', { totalSelected })}
-          </span>
+          </Text>
         </p>
       </div>
       <TableActionList>
@@ -76,7 +87,7 @@ TableBatchActions.propTypes = {
 
   /**
    * Hook required to listen for when the user initiates a cancel request
-   * through this comopnent
+   * through this component
    */
   onCancel: PropTypes.func.isRequired,
 
@@ -94,7 +105,7 @@ TableBatchActions.propTypes = {
 
   /**
    * Supply a method to translate internal strings with your i18n tool of
-   * choice. Translation keys are avabile on the `translationKeys` field for
+   * choice. Translation keys are available on the `translationKeys` field for
    * this component.
    */
   translateWithId: PropTypes.func,

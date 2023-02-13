@@ -1,8 +1,16 @@
-import { Story, Props, Source, Preview } from '@storybook/addon-docs/blocks';
+import { Story, Props, Source, Preview } from '@storybook/addon-docs';
 import DatePicker from '../DatePicker';
 import DatePickerInput from '../DatePickerInput';
 
 # Date Picker
+
+[Source code](https://github.com/carbon-design-system/carbon/tree/main/packages/react/src/components/DatePicker)
+&nbsp;|&nbsp;
+[Usage guidelines](https://www.carbondesignsystem.com/components/date-picker/usage)
+&nbsp;|&nbsp;
+[Accessibility](https://www.carbondesignsystem.com/components/date-picker/accessibility)
+
+## Table of Contents
 
 <!-- START doctoc generated TOC please keep comment here to allow auto update -->
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
@@ -20,6 +28,7 @@ import DatePickerInput from '../DatePickerInput';
   - [DatePicker `locale`](#datepicker-locale)
   - [DatePicker `maxDate`](#datepicker-maxdate)
   - [DatePicker `minDate`](#datepicker-mindate)
+  - [DatePicker `disable` and `enable`](#datepicker-disable-and-enable)
 - [References](#references)
 - [Feedback](#feedback)
 
@@ -34,6 +43,10 @@ picker is best to use. Each picker’s format can be customized depending on
 location or need. The `DatePicker` component expects a `DatePickerInput` as a
 child.
 
+<Preview>
+  <Story id="components-datepicker--playground" />
+</Preview>
+
 ### Simple DatePicker
 
 The simple date input provides the user with only a text field in which they can
@@ -41,7 +54,7 @@ manually input a date. It allows dates to be entered without adding unnecessary
 interactions that come with the calendar menu or a dropdown.
 
 <Preview>
-  <Story id="datepicker--simple" />
+  <Story id="components-datepicker--simple" />
 </Preview>
 
 ### Range Datepicker
@@ -51,8 +64,8 @@ is shown at a time. Calendar pickers allow users to navigate through months and
 years, however they work best when used for recent or near future dates.
 
 <Preview>
-  <Story id="datepicker--single" />
-  <Story id="datepicker--range" />
+  <Story id="components-datepicker--single-with-calendar" />
+  <Story id="components-datepicker--range-with-calendar" />
 </Preview>
 
 ### Skeleton state
@@ -62,7 +75,7 @@ You can use the `DatePickerSkeleton` component to render a skeleton variant of a
 `DatePicker` is being fetched from an external resource like an API.
 
 <Preview>
-  <Story id="datepicker--skeleton" />
+  <Story id="components-datepicker--skeleton" />
 </Preview>
 
 ## Component API
@@ -214,6 +227,41 @@ Works similarly to the `maxDate` prop. [See above](#datepicker-maxdate).
   />
 </DatePicker>
 
+### DatePicker `disable` and `enable`
+
+This uses the Flatpickr `disable` option which allows a user to disable certain
+dates. The disable takes in a array of date strings, or you can pass in a date
+function to the array that will disable dates that returns true.
+[See the Flatpickr documentation for more info](https://flatpickr.js.org/examples/#disabling-dates).
+
+```
+<DatePicker
+  datePickerType="single"
+  disable={[ (date) => (date.getDay() === 0 || date.getDay() === 6)]}>
+  <DatePickerInput
+    placeholder="dd/mm/yyyy"
+    id="date-picker-8"
+    labelText="minDate example"
+  />
+</DatePicker>
+```
+
+The `enable` option works the same, but will disable all dates that are not
+explicitly added to the array.
+[See the flatpickr documentation for more info](https://flatpickr.js.org/examples/#disabling-all-dates-except-select-few).
+
+```
+<DatePicker
+  datePickerType="single"
+  enable={["2021-04-01", "2021-05-01"]}>
+  <DatePickerInput
+    placeholder="dd/mm/yyyy"
+    id="date-picker-8"
+    labelText="minDate example"
+  />
+</DatePicker>
+```
+
 ### DatePicker `value`
 
 By default `DatePicker` will set the current date as its value. If you'd like to
@@ -262,6 +310,6 @@ start this at a different date, you can pass in a date string or date object.
 
 ## Feedback
 
-Help us improve this component by providing feedback, asking questions, and
-leaving any other comments on
-[GitHub](https://github.com/carbon-design-system/carbon/edit/master/packages/react/src/components/DatePicker/DatePicker.mdx).
+Help us improve this component by providing feedback, asking questions on Slack,
+or updating this file on
+[GitHub](https://github.com/carbon-design-system/carbon/edit/main/packages/react/src/components/DatePicker/DatePicker.mdx).

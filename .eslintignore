@@ -9,6 +9,7 @@ umd
 
 node_modules
 packages/*/examples/*
+packages/cra-template
 
 # Components
 packages/components/demo/*.css
@@ -29,12 +30,23 @@ packages/components/scss
 packages/components/html
 packages/components/docs/js
 packages/components/node_modules
+packages/components/scss/globals/vendor/**
+packages/components/src/globals/scss/vendor/**
 
 # Sketch
 *.sketchplugin
 
 # Upgrade
 **/__testfixtures__/**
+packages/upgrade/cli.js
 
 # React
 **/storybook-static/**
+packages/react/icons/index.js
+packages/react/icons/index.esm.js
+
+# Icons React
+packages/icons-react/next/**
+
+# Templates
+packages/cli/src/component/templates/**

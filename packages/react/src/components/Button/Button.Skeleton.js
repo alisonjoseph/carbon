@@ -8,15 +8,26 @@
 import PropTypes from 'prop-types';
 import React from 'react';
 import cx from 'classnames';
-import { settings } from 'carbon-components';
+import { usePrefix } from '../../internal/usePrefix';
+import * as FeatureFlags from '@carbon/feature-flags';
 
-const { prefix } = settings;
+const ButtonSkeleton = ({
+  className,
+  small = false,
+  href,
+  size = FeatureFlags.enabled('enable-v11-release') ? 'lg' : 'default',
+  ...rest
+}) => {
+  const prefix = usePrefix();
 
-const ButtonSkeleton = ({ className, small, href, ...rest }) => {
   const buttonClasses = cx(className, {
     [`${prefix}--skeleton`]: true,
     [`${prefix}--btn`]: true,
-    [`${prefix}--btn--sm`]: small,
+    [`${prefix}--btn--sm`]: small || size === 'sm',
+    [`${prefix}--btn--md`]: size === 'field' || size === 'md',
+    [`${prefix}--btn--lg`]: size === 'lg',
+    [`${prefix}--btn--xl`]: size === 'xl',
+    [`${prefix}--btn--2xl`]: size === '2xl',
   });
 
   const commonProps = {
@@ -38,9 +49,27 @@ ButtonSkeleton.propTypes = {
   className: PropTypes.string,
 
   /**
-   * Optionally specify an href for your Button to become an <a> element
+   * Optionally specify an href for your Button to become an `<a>` element
    */
   href: PropTypes.string,
+
+  /**
+   * Specify the size of the button, from a list of available sizes.
+   * For `default` buttons, this prop can remain unspecified or use `default`.
+   * In the next major release of Carbon, `default`, `field`, and `small` will be removed
+   */
+  size: FeatureFlags.enabled('enable-v11-release')
+    ? PropTypes.oneOf(['sm', 'md', 'lg', 'xl', '2xl'])
+    : PropTypes.oneOf([
+        'default',
+        'field',
+        'small',
+        'sm',
+        'md',
+        'lg',
+        'xl',
+        '2xl',
+      ]),
 
   /**
    * Specify whether the Button should be a small variant
@@ -48,8 +77,5 @@ ButtonSkeleton.propTypes = {
   small: PropTypes.bool,
 };
 
-ButtonSkeleton.defaultProps = {
-  small: false,
-};
-
 export default ButtonSkeleton;
+export { ButtonSkeleton };

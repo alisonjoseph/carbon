@@ -6,21 +6,21 @@
  */
 
 import React from 'react';
-import { settings } from 'carbon-components';
 import cx from 'classnames';
 import PropTypes from 'prop-types';
 import { AriaLabelPropType } from '../../prop-types/AriaPropTypes';
 import Link from './Link';
-
-const { prefix } = settings;
+import { usePrefix } from '../../internal/usePrefix';
 
 const SwitcherItem = React.forwardRef(function SwitcherItem(props, ref) {
+  const prefix = usePrefix();
   const {
     'aria-label': ariaLabel,
     'aria-labelledby': ariaLabelledBy,
     className: customClassName,
     children,
     isSelected,
+    tabIndex = 0,
     ...rest
   } = props;
 
@@ -43,7 +43,7 @@ const SwitcherItem = React.forwardRef(function SwitcherItem(props, ref) {
         {...rest}
         ref={ref}
         className={linkClassName}
-        tabIndex={0}
+        tabIndex={tabIndex}
         {...accessibilityLabel}>
         {children}
       </Link>
@@ -51,6 +51,7 @@ const SwitcherItem = React.forwardRef(function SwitcherItem(props, ref) {
   );
 });
 
+SwitcherItem.displayName = 'SwitcherItem';
 SwitcherItem.propTypes = {
   /**
    * Required props for accessibility label on the underlying menuitem
@@ -63,9 +64,14 @@ SwitcherItem.propTypes = {
   children: PropTypes.node.isRequired,
 
   /**
-   * Optionally provide a custom class to apply to the underlying <li> node
+   * Optionally provide a custom class to apply to the underlying `<li>` node
    */
   className: PropTypes.string,
+
+  /**
+   * Specify the tab index of the Link
+   */
+  tabIndex: PropTypes.number,
 };
 
 export default SwitcherItem;

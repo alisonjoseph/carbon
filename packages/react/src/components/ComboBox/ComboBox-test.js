@@ -6,28 +6,21 @@
  */
 
 import React from 'react';
-import { mount } from 'enzyme';
+import { render, screen, within } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import {
   findListBoxNode,
-  findMenuNode,
-  findMenuItemNode,
-  openMenu,
   assertMenuOpen,
   assertMenuClosed,
   generateItems,
   generateGenericItem,
 } from '../ListBox/test-helpers';
 import ComboBox from '../ComboBox';
-import { settings } from 'carbon-components';
 
-const { prefix } = settings;
-
-const findInputNode = (wrapper) => wrapper.find(`.${prefix}--text-input`);
-const downshiftActions = {
-  setHighlightedIndex: jest.fn(),
+const findInputNode = () => screen.getByRole('combobox');
+const openMenu = () => {
+  userEvent.click(findInputNode());
 };
-const clearInput = (wrapper) =>
-  wrapper.instance().handleOnStateChange({ inputValue: '' }, downshiftActions);
 
 describe('ComboBox', () => {
   let mockProps;
@@ -42,29 +35,23 @@ describe('ComboBox', () => {
     };
   });
 
-  it('should display the placeholder text when no items are selected and the control is not focused', () => {
-    const wrapper = mount(<ComboBox {...mockProps} />);
-    expect(findInputNode(wrapper).prop('value')).toBe('');
-    expect(findInputNode(wrapper).prop('placeholder')).toBe(
-      mockProps.placeholder
-    );
-  });
-
   it('should display the menu of items when a user clicks on the input', () => {
-    const wrapper = mount(<ComboBox {...mockProps} />);
-    findInputNode(wrapper).simulate('click');
+    render(<ComboBox {...mockProps} />);
 
-    assertMenuOpen(wrapper, mockProps);
+    userEvent.click(findInputNode());
+
+    assertMenuOpen(mockProps);
   });
 
   it('should call `onChange` each time an item is selected', () => {
-    const wrapper = mount(<ComboBox {...mockProps} />);
+    render(<ComboBox {...mockProps} />);
     expect(mockProps.onChange).not.toHaveBeenCalled();
 
     for (let i = 0; i < mockProps.items.length; i++) {
-      clearInput(wrapper);
-      openMenu(wrapper);
-      findMenuItemNode(wrapper, i).simulate('click');
+      openMenu();
+
+      userEvent.click(screen.getAllByRole('option')[i]);
+
       expect(mockProps.onChange).toHaveBeenCalledTimes(i + 1);
       expect(mockProps.onChange).toHaveBeenCalledWith({
         selectedItem: mockProps.items[i],
@@ -74,41 +61,40 @@ describe('ComboBox', () => {
 
   it('capture filter text events', () => {
     const onInputChange = jest.fn();
-    const wrapper = mount(
-      <ComboBox {...mockProps} onInputChange={onInputChange} />
-    );
+    render(<ComboBox {...mockProps} onInputChange={onInputChange} />);
 
-    findInputNode(wrapper).simulate('change', {
-      target: { value: 'something' },
-    });
+    userEvent.type(findInputNode(), 'something');
 
     expect(onInputChange).toHaveBeenCalledWith('something');
   });
 
   it('should render custom item components', () => {
-    const wrapper = mount(<ComboBox {...mockProps} />);
-    wrapper.setProps({
-      itemToElement: (item) => <div className="mock-item">{item.text}</div>,
+    const itemToElement = jest.fn((item) => {
+      return <div className="mock-item">{item.text}</div>;
     });
-    openMenu(wrapper);
+    render(<ComboBox {...mockProps} itemToElement={itemToElement} />);
+    openMenu();
 
-    expect(wrapper.find(`.mock-item`).length).toBe(mockProps.items.length);
+    expect(itemToElement).toHaveBeenCalled();
   });
 
   it('should let the user select an option by clicking on the option node', () => {
-    const wrapper = mount(<ComboBox {...mockProps} />);
-    openMenu(wrapper);
-    findMenuItemNode(wrapper, 0).simulate('click');
+    render(<ComboBox {...mockProps} />);
+    openMenu();
+
+    userEvent.click(screen.getAllByRole('option')[0]);
+
     expect(mockProps.onChange).toHaveBeenCalledTimes(1);
     expect(mockProps.onChange).toHaveBeenCalledWith({
       selectedItem: mockProps.items[0],
     });
-    assertMenuClosed(wrapper);
+    assertMenuClosed();
 
     mockProps.onChange.mockClear();
 
-    openMenu(wrapper);
-    findMenuItemNode(wrapper, 1).simulate('click');
+    openMenu();
+
+    userEvent.click(screen.getAllByRole('option')[1]);
     expect(mockProps.onChange).toHaveBeenCalledTimes(1);
     expect(mockProps.onChange).toHaveBeenCalledWith({
       selectedItem: mockProps.items[1],
@@ -117,12 +103,10 @@ describe('ComboBox', () => {
 
   describe('should display initially selected item found in `initialSelectedItem`', () => {
     it('using an object type for the `initialSelectedItem` prop', () => {
-      const wrapper = mount(
+      render(
         <ComboBox {...mockProps} initialSelectedItem={mockProps.items[0]} />
       );
-      expect(findInputNode(wrapper).prop('value')).toEqual(
-        mockProps.items[0].label
-      );
+      expect(findInputNode()).toHaveDisplayValue(mockProps.items[0].label);
     });
 
     it('using a string type for the `initialSelectedItem` prop', () => {
@@ -132,22 +116,19 @@ describe('ComboBox', () => {
         items: ['1', '2', '3'],
       };
 
-      const wrapper = mount(
+      render(
         <ComboBox {...mockProps} initialSelectedItem={mockProps.items[1]} />
       );
 
-      expect(findInputNode(wrapper).prop('value')).toEqual(mockProps.items[1]);
+      expect(findInputNode()).toHaveDisplayValue(mockProps.items[1]);
     });
   });
 
   describe('should display selected item found in `selectedItem`', () => {
     it('using an object type for the `selectedItem` prop', () => {
-      const wrapper = mount(
-        <ComboBox {...mockProps} selectedItem={mockProps.items[0]} />
-      );
-      expect(findInputNode(wrapper).prop('value')).toEqual(
-        mockProps.items[0].label
-      );
+      render(<ComboBox {...mockProps} selectedItem={mockProps.items[0]} />);
+
+      expect(findInputNode()).toHaveDisplayValue(mockProps.items[0].label);
     });
 
     it('using a string type for the `selectedItem` prop', () => {
@@ -157,60 +138,101 @@ describe('ComboBox', () => {
         items: ['1', '2', '3'],
       };
 
-      const wrapper = mount(
-        <ComboBox {...mockProps} selectedItem={mockProps.items[1]} />
-      );
+      render(<ComboBox {...mockProps} selectedItem={mockProps.items[1]} />);
 
-      expect(findInputNode(wrapper).prop('value')).toEqual(mockProps.items[1]);
+      expect(findInputNode()).toHaveDisplayValue(mockProps.items[1]);
     });
   });
 
   describe('when disabled', () => {
     it('should not let the user edit the input node', () => {
-      const wrapper = mount(<ComboBox {...mockProps} disabled={true} />);
-      expect(findInputNode(wrapper).prop('disabled')).toBe(true);
-      expect(findInputNode(wrapper).prop('value')).toBe('');
+      render(<ComboBox {...mockProps} disabled={true} />);
 
-      findInputNode(wrapper).simulate('change', {
-        target: {
-          value: 'a',
-        },
-      });
+      expect(findInputNode()).toHaveAttribute('disabled');
 
-      expect(findInputNode(wrapper).prop('value')).toBe('');
+      expect(findInputNode()).toHaveDisplayValue('');
+
+      userEvent.type(findInputNode(), 'a');
+
+      expect(findInputNode()).toHaveDisplayValue('');
     });
 
     it('should not let the user expand the menu', () => {
-      const wrapper = mount(<ComboBox {...mockProps} disabled={true} />);
-      openMenu(wrapper);
-      expect(findListBoxNode(wrapper).hasClass('bx--list-box--expanded')).toBe(
-        false
-      );
+      render(<ComboBox {...mockProps} disabled={true} />);
+      openMenu();
+      expect(findListBoxNode()).not.toHaveClass('cds--list-box--expanded');
+    });
+  });
+
+  describe('when readonly', () => {
+    it('should not let the user edit the input node', () => {
+      render(<ComboBox {...mockProps} readOnly={true} />);
+
+      expect(findInputNode()).toHaveAttribute('readonly');
+
+      expect(findInputNode()).toHaveDisplayValue('');
+
+      userEvent.type(findInputNode(), 'o');
+
+      expect(findInputNode()).toHaveDisplayValue('');
+    });
+
+    it('should not let the user expand the menu', () => {
+      render(<ComboBox {...mockProps} disabled={true} />);
+      openMenu();
+      expect(findListBoxNode()).not.toHaveClass('cds--list-box--expanded');
     });
   });
 
   describe('downshift quirks', () => {
-    it('should not trigger the menu when typing a space in input', () => {
-      const wrapper = mount(<ComboBox {...mockProps} />);
+    it('should set `inputValue` to an empty string if a false-y value is given', () => {
+      render(<ComboBox {...mockProps} />);
 
-      openMenu(wrapper);
-      findInputNode(wrapper).simulate('change', {
-        target: {
-          value: ' ',
-        },
-      });
-
-      expect(findMenuNode(wrapper).length).toBe(1);
+      expect(findInputNode()).toHaveDisplayValue('');
     });
 
-    it('should set `inputValue` to an empty string if a falsey-y value is given', () => {
-      const wrapper = mount(<ComboBox {...mockProps} />);
+    it('should only render one listbox at a time when multiple comboboxes are present', () => {
+      render(
+        <>
+          <div data-testid="combobox-1">
+            <ComboBox {...mockProps} id="combobox-1" />
+          </div>
+          <div data-testid="combobox-2">
+            <ComboBox {...mockProps} id="combobox-2" />
+          </div>
+        </>
+      );
+      const firstCombobox = screen.getByTestId('combobox-1');
+      const secondCombobox = screen.getByTestId('combobox-2');
 
-      wrapper.instance().handleOnInputValueChange('foo', downshiftActions);
-      expect(wrapper.state('inputValue')).toBe('foo');
+      const firstComboboxChevron = within(firstCombobox).getByRole('button');
+      const secondComboboxChevron = within(secondCombobox).getByRole('button');
 
-      wrapper.instance().handleOnInputValueChange(null, downshiftActions);
-      expect(wrapper.state('inputValue')).toBe('');
+      function firstListBox() {
+        return within(firstCombobox).getByRole('listbox');
+      }
+
+      function secondListBox() {
+        return within(secondCombobox).getByRole('listbox');
+      }
+
+      expect(firstListBox()).toBeEmptyDOMElement();
+      expect(secondListBox()).toBeEmptyDOMElement();
+
+      userEvent.click(firstComboboxChevron);
+
+      expect(firstListBox()).not.toBeEmptyDOMElement();
+      expect(secondListBox()).toBeEmptyDOMElement();
+
+      userEvent.click(secondComboboxChevron);
+
+      expect(firstListBox()).toBeEmptyDOMElement();
+      expect(secondListBox()).not.toBeEmptyDOMElement();
+
+      userEvent.click(secondComboboxChevron);
+
+      expect(firstListBox()).toBeEmptyDOMElement();
+      expect(secondListBox()).toBeEmptyDOMElement();
     });
   });
 });

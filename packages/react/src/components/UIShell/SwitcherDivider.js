@@ -6,13 +6,12 @@
  */
 
 import React from 'react';
-import { settings } from 'carbon-components';
 import cx from 'classnames';
 import PropTypes from 'prop-types';
-
-const { prefix } = settings;
+import { usePrefix } from '../../internal/usePrefix';
 
 const SwitcherDivider = ({ className: customClassName, ...other }) => {
+  const prefix = usePrefix();
   const className = cx(`${prefix}--switcher__item--divider`, {
     [customClassName]: !!customClassName,
   });
@@ -22,7 +21,7 @@ const SwitcherDivider = ({ className: customClassName, ...other }) => {
 
 SwitcherDivider.propTypes = {
   /**
-   * Optionally provide a custom class to apply to the underlying <li> node
+   * Optionally provide a custom class to apply to the underlying `<li>` node
    */
   className: PropTypes.string,
 };

@@ -6,7 +6,7 @@
  */
 
 import { getCellId } from './cells';
-import { sortStates } from '../state/sorting';
+import { sortStates } from '../state/sortStates';
 
 /**
  * Compare two primitives to determine which comes first. Initially, this method
@@ -28,12 +28,22 @@ export const compare = (a, b, locale = 'en') => {
     return compareStrings(a, b, locale);
   }
 
+  // if column has React elements, this should sort by the child string if there is one
+  if (typeof a === 'object' && typeof b === 'object') {
+    if (
+      typeof a.props.children === 'string' &&
+      typeof b.props.children === 'string'
+    ) {
+      return compareStrings(a.props.children, b.props.children, locale);
+    }
+  }
+
   return compareStrings('' + a, '' + b, locale);
 };
 
 /**
  * Use the built-in `localeCompare` function available on strings to compare two
- * srints.
+ * strings.
  *
  * @param {string} a
  * @param {string} b
@@ -41,7 +51,13 @@ export const compare = (a, b, locale = 'en') => {
  * @returns {number}
  */
 export const compareStrings = (a, b, locale = 'en') => {
-  return a.localeCompare(b, locale, { numeric: true });
+  // Only set `numeric: true` if the string only contains numbers
+  // https://stackoverflow.com/a/175787
+  if (!isNaN(a) && !isNaN(parseFloat(a))) {
+    return a.localeCompare(b, locale, { numeric: true });
+  }
+
+  return a.localeCompare(b, locale);
 };
 
 /**
@@ -55,11 +71,12 @@ export const compareStrings = (a, b, locale = 'en') => {
  * @param {Array[string]} config.rowIds array of all the row ids in the table
  * @param {object} config.cellsById object containing a mapping of cell id to
  * cell
- * @param {string} config.direction the sort direction used to determine the
- * order the comparison is called in
  * @param {string} config.key the header key that we use to lookup the cell
  * @param {string} [config.locale] optional locale used in the comparison
  * function
+ * @param {string} config.sortDirection the sort direction used to determine the
+ * order the comparison is called in
+ * @param {Function} config.sortRow
  * @returns {Array[string]} array of sorted rowIds
  */
 export const sortRows = ({
@@ -73,7 +90,7 @@ export const sortRows = ({
   rowIds.slice().sort((a, b) => {
     const cellA = cellsById[getCellId(a, key)];
     const cellB = cellsById[getCellId(b, key)];
-    return sortRow(cellA.value, cellB.value, {
+    return sortRow(cellA && cellA.value, cellB && cellB.value, {
       key,
       sortDirection,
       locale,

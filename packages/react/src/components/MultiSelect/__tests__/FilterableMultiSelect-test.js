@@ -6,20 +6,22 @@
  */
 
 import React from 'react';
-import { mount } from 'enzyme';
-import MultiSelect from '../../MultiSelect';
+import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import FilterableMultiSelect from '../FilterableMultiSelect';
 import {
   assertMenuOpen,
   assertMenuClosed,
   findMenuIconNode,
-  openMenu,
   generateItems,
   generateGenericItem,
 } from '../../ListBox/test-helpers';
 
-const listItemName = 'ListBoxMenuItem';
+const openMenu = () => {
+  userEvent.click(screen.getByRole('combobox'));
+};
 
-describe('MultiSelect.Filterable', () => {
+describe('FilterableMultiSelect', () => {
   let mockProps;
 
   beforeEach(() => {
@@ -29,80 +31,72 @@ describe('MultiSelect.Filterable', () => {
       items: generateItems(5, generateGenericItem),
       initialSelectedItems: [],
       onChange: jest.fn(),
+      onMenuChange: jest.fn(),
       placeholder: 'Placeholder...',
     };
   });
 
-  it('should render', () => {
-    const wrapper = mount(<MultiSelect.Filterable {...mockProps} />);
-    expect(wrapper).toMatchSnapshot();
-  });
-
-  it('should display all items when the menu is open initially', () => {
-    const wrapper = mount(<MultiSelect.Filterable {...mockProps} />);
-    openMenu(wrapper);
-    expect(wrapper.find(listItemName).length).toBe(mockProps.items.length);
+  it('should display all items when the menu is open', () => {
+    render(<FilterableMultiSelect {...mockProps} />);
+    openMenu();
+    expect(screen.getAllByRole('option').length).toBe(mockProps.items.length);
   });
 
   it('should initially have the menu open when open prop is provided', () => {
-    const wrapper = mount(<MultiSelect.Filterable {...mockProps} open />);
-    assertMenuOpen(wrapper, mockProps);
+    render(<FilterableMultiSelect {...mockProps} open />);
+    assertMenuOpen(mockProps);
   });
 
   it('should open the menu with a down arrow', () => {
-    const wrapper = mount(<MultiSelect.Filterable {...mockProps} />);
-    const menuIconNode = findMenuIconNode(wrapper);
+    render(<FilterableMultiSelect {...mockProps} />);
+    const menuIconNode = findMenuIconNode();
 
-    menuIconNode.simulate('keyDown', { key: 'ArrowDown' });
-    assertMenuOpen(wrapper, mockProps);
+    userEvent.type(menuIconNode, '{arrowdown}');
+    expect(screen.getAllByRole('option').length).toBe(mockProps.items.length);
   });
 
   it('should let the user toggle the menu by the menu icon', () => {
-    const wrapper = mount(<MultiSelect.Filterable {...mockProps} />);
-    findMenuIconNode(wrapper).simulate('click');
-    assertMenuOpen(wrapper, mockProps);
-    findMenuIconNode(wrapper).simulate('click');
-    assertMenuClosed(wrapper);
+    render(<FilterableMultiSelect {...mockProps} />);
+    userEvent.click(findMenuIconNode());
+
+    assertMenuOpen(mockProps);
+    userEvent.click(findMenuIconNode());
+
+    assertMenuClosed();
   });
 
   it('should not close the menu after a user makes a selection', () => {
-    const wrapper = mount(<MultiSelect.Filterable {...mockProps} />);
-    openMenu(wrapper);
+    render(<FilterableMultiSelect {...mockProps} />);
+    openMenu();
 
-    const firstListItem = wrapper.find(listItemName).at(0);
+    userEvent.click(screen.getAllByRole('option')[0]);
 
-    firstListItem.simulate('click');
-    assertMenuOpen(wrapper, mockProps);
+    assertMenuOpen(mockProps);
   });
 
   it('should filter a list of items by the input value', () => {
-    const wrapper = mount(<MultiSelect.Filterable {...mockProps} />);
-    openMenu(wrapper);
-    expect(wrapper.find(listItemName).length).toBe(mockProps.items.length);
+    render(<FilterableMultiSelect {...mockProps} placeholder="test" />);
+    openMenu();
+    expect(screen.getAllByRole('option').length).toBe(mockProps.items.length);
 
-    wrapper
-      .find('[placeholder="Placeholder..."]')
-      .at(1)
-      .simulate('change', { target: { value: '3' } });
+    userEvent.type(screen.getByPlaceholderText('test'), '3');
 
-    expect(wrapper.find(listItemName).length).toBe(1);
+    expect(screen.getAllByRole('option').length).toBe(1);
   });
 
   it('should call `onChange` with each update to selected items', () => {
-    const wrapper = mount(
-      <MultiSelect.Filterable {...mockProps} selectionFeedback="top" />
-    );
-    openMenu(wrapper);
+    render(<FilterableMultiSelect {...mockProps} selectionFeedback="top" />);
+    openMenu();
 
     // Select the first two items
-    wrapper.find(listItemName).at(0).simulate('click');
+    userEvent.click(screen.getAllByRole('option')[0]);
 
     expect(mockProps.onChange).toHaveBeenCalledTimes(1);
     expect(mockProps.onChange).toHaveBeenCalledWith({
       selectedItems: [mockProps.items[0]],
     });
 
-    wrapper.find(listItemName).at(1).simulate('click');
+    userEvent.click(screen.getAllByRole('option')[1]);
 
     expect(mockProps.onChange).toHaveBeenCalledTimes(2);
     expect(mockProps.onChange).toHaveBeenCalledWith({
@@ -110,34 +104,32 @@ describe('MultiSelect.Filterable', () => {
     });
 
     // Un-select the next two items
-    wrapper.find(listItemName).at(0).simulate('click');
+    userEvent.click(screen.getAllByRole('option')[0]);
     expect(mockProps.onChange).toHaveBeenCalledTimes(3);
     expect(mockProps.onChange).toHaveBeenCalledWith({
       selectedItems: [mockProps.items[0]],
     });
 
-    wrapper.find(listItemName).at(0).simulate('click');
+    userEvent.click(screen.getAllByRole('option')[0]);
     expect(mockProps.onChange).toHaveBeenCalledTimes(4);
     expect(mockProps.onChange).toHaveBeenCalledWith({
       selectedItems: [],
     });
   });
 
-  it('should let items stay at thier position after selecting', () => {
-    const wrapper = mount(
-      <MultiSelect.Filterable {...mockProps} selectionFeedback="fixed" />
-    );
-    openMenu(wrapper);
+  it('should let items stay at their position after selecting', () => {
+    render(<FilterableMultiSelect {...mockProps} selectionFeedback="fixed" />);
+    openMenu();
 
     // Select the first two items
-    wrapper.find(listItemName).at(1).simulate('click');
+    userEvent.click(screen.getAllByRole('option')[1]);
 
     expect(mockProps.onChange).toHaveBeenCalledTimes(1);
     expect(mockProps.onChange).toHaveBeenCalledWith({
       selectedItems: [mockProps.items[1]],
     });
 
-    wrapper.find(listItemName).at(1).simulate('click');
+    userEvent.click(screen.getAllByRole('option')[1]);
 
     expect(mockProps.onChange).toHaveBeenCalledTimes(2);
     expect(mockProps.onChange).toHaveBeenCalledWith({
@@ -146,18 +138,13 @@ describe('MultiSelect.Filterable', () => {
   });
 
   it('should not clear input value after a user makes a selection', () => {
-    const wrapper = mount(<MultiSelect.Filterable {...mockProps} />);
-    openMenu(wrapper);
+    render(<FilterableMultiSelect {...mockProps} placeholder="test" />);
+    openMenu();
 
-    wrapper
-      .find('[placeholder="Placeholder..."]')
-      .at(1)
-      .simulate('change', { target: { value: '3' } });
+    userEvent.type(screen.getByPlaceholderText('test'), '3');
 
-    wrapper.find(listItemName).at(0).simulate('click');
+    userEvent.click(screen.getAllByRole('option')[0]);
 
-    expect(
-      wrapper.find('[placeholder="Placeholder..."]').at(1).props().value
-    ).toEqual('3');
+    expect(screen.getByPlaceholderText('test')).toHaveDisplayValue(3);
   });
 });

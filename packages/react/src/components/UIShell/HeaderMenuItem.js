@@ -5,13 +5,11 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-import { settings } from 'carbon-components';
 import PropTypes from 'prop-types';
 import React from 'react';
 import cx from 'classnames';
 import Link, { LinkPropTypes } from './Link';
-
-const { prefix } = settings;
+import { usePrefix } from '../../internal/usePrefix';
 
 const HeaderMenuItem = React.forwardRef(function HeaderMenuItem(
   {
@@ -20,10 +18,12 @@ const HeaderMenuItem = React.forwardRef(function HeaderMenuItem(
     'aria-current': ariaCurrent,
     children,
     role,
+    tabIndex = 0,
     ...rest
   },
   ref
 ) {
+  const prefix = usePrefix();
   const linkClassName = cx({
     [`${prefix}--header__menu-item`]: true,
     // We set the current class only if `isCurrentPage` is passed in and we do
@@ -39,13 +39,14 @@ const HeaderMenuItem = React.forwardRef(function HeaderMenuItem(
         aria-current={ariaCurrent}
         className={linkClassName}
         ref={ref}
-        tabIndex={0}>
+        tabIndex={tabIndex}>
         <span className={`${prefix}--text-truncate--end`}>{children}</span>
       </Link>
     </li>
   );
 });
 
+HeaderMenuItem.displayName = 'HeaderMenuItem';
 HeaderMenuItem.propTypes = {
   /**
    * Pass in a valid `element` to replace the underlying `<a>` tag with a
@@ -60,7 +61,7 @@ HeaderMenuItem.propTypes = {
   children: PropTypes.node.isRequired,
 
   /**
-   * Optionally provide a custom class to apply to the underlying <li> node
+   * Optionally provide a custom class to apply to the underlying `<li>` node
    */
   className: PropTypes.string,
 
@@ -70,10 +71,15 @@ HeaderMenuItem.propTypes = {
   isCurrentPage: PropTypes.bool,
 
   /**
-   * Optionally supply a role for the underlying <li> node. Useful for resetting
-   * <ul> semantics for menus.
+   * Optionally supply a role for the underlying `<li>` node. Useful for resetting
+   * `<ul>` semantics for menus.
    */
   role: PropTypes.string,
+
+  /**
+   * Specify the tab index of the Link
+   */
+  tabIndex: PropTypes.number,
 };
 
 export default HeaderMenuItem;

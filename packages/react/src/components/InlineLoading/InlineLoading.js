@@ -8,27 +8,29 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
-import { CheckmarkFilled16, ErrorFilled16 } from '@carbon/icons-react';
-import { settings } from 'carbon-components';
-import deprecate from '../../prop-types/deprecate';
+import { CheckmarkFilled, ErrorFilled } from '@carbon/icons-react';
 import Loading from '../Loading';
-
-const { prefix } = settings;
+import { usePrefix } from '../../internal/usePrefix';
 
 export default function InlineLoading({
   className,
-  success,
-  status = success ? 'finished' : 'active',
+  status = 'active',
   iconDescription,
   description,
   onSuccess,
-  successDelay,
+  successDelay = 1500,
   ...other
 }) {
+  const prefix = usePrefix();
   const loadingClasses = classNames(`${prefix}--inline-loading`, className);
   const getLoading = () => {
+    let iconLabel = iconDescription ? iconDescription : status;
     if (status === 'error') {
-      return <ErrorFilled16 className={`${prefix}--inline-loading--error`} />;
+      return (
+        <ErrorFilled className={`${prefix}--inline-loading--error`}>
+          <title>{iconLabel}</title>
+        </ErrorFilled>
+      );
     }
     if (status === 'finished') {
       setTimeout(() => {
@@ -37,16 +39,20 @@ export default function InlineLoading({
         }
       }, successDelay);
       return (
-        <CheckmarkFilled16
-          className={`${prefix}--inline-loading__checkmark-container`}
-        />
+        <CheckmarkFilled
+          className={`${prefix}--inline-loading__checkmark-container`}>
+          <title>{iconLabel}</title>
+        </CheckmarkFilled>
       );
     }
     if (status === 'inactive' || status === 'active') {
+      if (!iconDescription) {
+        iconLabel = status === 'active' ? 'loading' : 'not loading';
+      }
       return (
         <Loading
           small
-          description={iconDescription}
+          description={iconLabel}
           withOverlay={false}
           active={status === 'active'}
         />
@@ -89,7 +95,7 @@ InlineLoading.propTypes = {
   iconDescription: PropTypes.string,
 
   /**
-   * Provide an optional handler to be inovked when <InlineLoading> is
+   * Provide an optional handler to be invoked when <InlineLoading> is
    * successful
    */
   onSuccess: PropTypes.func,
@@ -100,18 +106,7 @@ InlineLoading.propTypes = {
   status: PropTypes.oneOf(['inactive', 'active', 'finished', 'error']),
 
   /**
-   * Specify whether the load was successful
-   */
-  success: deprecate(
-    PropTypes.bool,
-    `\nThe prop \`success\` for InlineLoading has been deprecated in favor of \`status\`. Please use \`status="finished"\` instead.`
-  ),
-
-  /**
    * Provide a delay for the `setTimeout` for success
    */
   successDelay: PropTypes.number,
-};
-InlineLoading.defaultProps = {
-  successDelay: 1500,
 };

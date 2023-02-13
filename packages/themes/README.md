@@ -31,56 +31,40 @@ You can preview all of the token values for this on the
 
 ### Sass
 
-If you're project is using Sass, you can include this package and the
+If your project is using Sass, you can include this package and the
 corresponding default theme by writing the following in your Sass file:
 
 ```scss
-@import '@carbon/themes/scss/themes';
+@use '@carbon/themes/scss/themes';
 ```
 
 By default, the white theme will be initialized. If you would like to include
-another theme, you can do so by calling our mixin. For example:
+another theme, you can do so by setting the global theme variable in the import.
+For example:
 
 ```scss
-@import '@carbon/themes/scss/themes';
-
-// Use the gray 10 theme
-@include carbon--theme($carbon--theme--g10);
-
-// Use the gray 90 theme
-@include carbon--theme($carbon--theme--g90);
-
-// Use the gray 100 theme
-@include carbon--theme($carbon--theme--g100);
-```
-
-Alternatively, you can set the global theme variable then call the mixin without
-passing in a theme name.
-
-```scss
-@import '@carbon/themes/scss/themes';
-
-$carbon--theme: $carbon--theme--g10;
-
-// Use the gray 10 theme
-@include carbon--theme();
+@use '@carbon/themes/scss/themes' as *;
+@use '@carbon/themes' with (
+  $theme: $g100
+);
 ```
 
 Inline theming can be done by using the mixin. For example:
 
 ```scss
-@import '@carbon/themes/scss/themes';
+@use '@carbon/themes/scss/themes';
+@use '@carbon/themes/scss/theme';
 
 // Use the default white theme here
 
 .my-dark-theme {
-  @include carbon--theme($carbon--theme--g90) {
+  @include theme.theme(themes.$g90) {
     // Use the dark theme here
   }
 }
 
 .my-darker-theme {
-  @include carbon--theme($carbon--theme--g100) {
+  @include theme.theme(themes.$g100) {
     // Use the darker theme here
   }
 }
@@ -113,6 +97,14 @@ import {
 If you're looking for `@carbon/themes` API documentation, check out:
 
 - [Sass](./docs/sass.md)
+
+## 📚 Examples
+
+If you're looking for more examples on how to use `@carbon/themes`, we have some
+examples that you can check out:
+
+- [preview](./examples/preview)
+- [sass-modules](./examples/sass-modules)
 
 ## 🙌 Contributing
 

@@ -5,76 +5,77 @@
   "repository": "git@github.com:carbon-design-system/carbon.git",
   "license": "Apache-2.0",
   "engines": {
-    "node": "12.x"
+    "node": ">=16.x"
   },
-  "workspaces": {
-    "packages": [
-      "actions/*",
-      "codemods",
-      "config/*",
-      "packages/*"
-    ],
-    "nohoist": []
-  },
+  "workspaces": [
+    "actions/*",
+    "config/*",
+    "examples/*",
+    "packages/*",
+    "www"
+  ],
   "scripts": {
-    "build": "lerna run build --stream --prefix --npm-client yarn",
+    "build": "lerna run build --stream --prefix",
     "ci-check": "carbon-cli ci-check",
     "clean": "lerna run clean && lerna clean --yes && rimraf node_modules",
     "doctoc": "doctoc --title '## Table of Contents'",
-    "format": "prettier --write '**/*.{js,md,scss,ts}' '!**/{build,es,lib,storybook,ts,umd}/**'",
-    "format:diff": "prettier --list-different '**/*.{js,md,scss,ts}' '!**/{build,es,lib,storybook,ts,umd}/**' '!packages/components/**'",
-    "lint": "eslint actions config codemods packages",
+    "format": "prettier --cache --write '**/*.{js,md,scss,ts}' '!**/{build,es,lib,storybook,ts,umd}/**'",
+    "format:diff": "prettier --cache --list-different '**/*.{js,md,scss,ts}' '!**/{build,es,lib,storybook,ts,umd}/**' '!packages/components/**'",
+    "lint": "eslint actions config packages www",
     "lint:styles": "stylelint '**/*.{css,scss}' --report-needless-disables --report-invalid-scope-disables",
     "sync": "carbon-cli sync",
     "test": "cross-env BABEL_ENV=test jest",
-    "test:e2e": "cross-env BABEL_ENV=test jest --testPathPattern=e2e --testPathIgnorePatterns='examples,/packages/components/,/packages/react/'"
+    "test:e2e": "cross-env BABEL_ENV=test jest -c jest.e2e.config.js",
+    "postinstall": "husky install"
   },
   "resolutions": {
-    "react": "~16.9.0",
-    "react-dom": "~16.9.0",
-    "react-is": "~16.9.0",
-    "react-test-renderer": "~16.9.0"
+    "@types/react": "~17.0.2",
+    "@types/prop-types": "15.7.5",
+    "ast-types": "^0.14.0",
+    "node-sass": "^8.0.0",
+    "react": "~17.0.2",
+    "react-dom": "~17.0.2",
+    "react-is": "~17.0.2",
+    "react-test-renderer": "~17.0.2"
   },
   "devDependencies": {
-    "@babel/core": "^7.10.0",
-    "@babel/plugin-proposal-class-properties": "^7.7.4",
-    "@babel/plugin-proposal-export-default-from": "^7.7.4",
-    "@babel/plugin-proposal-export-namespace-from": "^7.7.4",
-    "@babel/plugin-transform-runtime": "^7.10.0",
-    "@babel/preset-env": "^7.10.0",
-    "@babel/preset-react": "^7.10.0",
-    "@babel/runtime": "^7.10.0",
-    "@commitlint/cli": "^8.3.5",
-    "@commitlint/config-conventional": "^8.3.4",
-    "@ibma/aat": "https://able.ibm.com/tools/dist/ibma-aat-2.0.6.tgz",
-    "axe-core": "^3.3.2",
-    "babel-jest": "^26.0.1",
-    "cross-env": "^5.2.0",
-    "cross-spawn": "^6.0.5",
-    "doctoc": "^1.4.0",
-    "enzyme": "^3.10.0",
-    "enzyme-adapter-react-16": "^1.14.0",
-    "enzyme-to-json": "^3.3.5",
-    "eslint": "^6.8.0",
-    "fs-extra": "^8.1.0",
+    "@babel/core": "^7.18.2",
+    "@babel/plugin-proposal-class-properties": "^7.17.12",
+    "@babel/plugin-proposal-export-default-from": "^7.17.12",
+    "@babel/plugin-proposal-export-namespace-from": "^7.17.12",
+    "@babel/plugin-transform-runtime": "^7.18.2",
+    "@babel/preset-env": "^7.18.2",
+    "@babel/preset-react": "^7.17.12",
+    "@babel/runtime": "^7.18.3",
+    "@carbon/cli": "workspace:packages/cli",
+    "@commitlint/cli": "^17.0.0",
+    "@commitlint/config-conventional": "^17.0.0",
+    "@percy/cli": "^1.1.0",
+    "@percy/playwright": "^1.0.4",
+    "@playwright/test": "^1.28.0",
+    "@testing-library/dom": "^8.11.1",
+    "@testing-library/jest-dom": "^5.16.1",
+    "@testing-library/react": "^12.1.2",
+    "@testing-library/user-event": "^13.5.0",
+    "accessibility-checker": "^3.1.32",
+    "all-contributors-cli": "^6.19.0",
+    "cross-env": "^7.0.0",
+    "cross-spawn": "^7.0.0",
+    "doctoc": "^2.0.0",
+    "eslint": "^7.28.0",
+    "fs-extra": "^10.0.0",
     "glob": "^7.1.4",
-    "husky": "^4.0.10",
-    "jest": "^26.0.1",
-    "jest-circus": "^26.0.1",
-    "jest-junit": "^10.0.0",
-    "lerna": "^3.20.2",
-    "lint-staged": "^9.5.0",
-    "prettier": "^2.1.0",
-    "react": "^16.8.6",
-    "react-dom": "^16.8.6",
-    "rimraf": "^3.0.0",
-    "stylelint": "^13.6.0"
-  },
-  "husky": {
-    "hooks": {
-      "commit-msg": "commitlint -e $HUSKY_GIT_PARAMS",
-      "pre-commit": "lint-staged"
-    }
+    "husky": "^8.0.0",
+    "jest": "^28.1.0",
+    "jest-junit": "^15.0.0",
+    "lerna": "^6.0.0",
+    "lint-staged": "^13.0.0",
+    "node-gyp": "^7.1.2",
+    "prettier": "^2.7.1",
+    "react": "^17.0.2",
+    "react-dom": "^17.0.2",
+    "rimraf": "^4.0.0",
+    "stylelint": "^14.3.0"
   },
   "commitlint": {
     "extends": [
@@ -109,7 +110,8 @@
           "perf",
           "refactor",
           "revert",
-          "test"
+          "test",
+          "style"
         ]
       ]
     }
@@ -117,22 +119,19 @@
   "lint-staged": {
     "**/*.js": [
       "prettier --write",
-      "eslint",
-      "git add"
+      "eslint"
     ],
     "**/*.scss": [
       "prettier --write",
-      "stylelint --report-needless-disables --report-invalid-scope-disables --allow-empty-input",
-      "git add"
+      "stylelint --report-needless-disables --report-invalid-scope-disables --allow-empty-input"
     ],
     "!(*sass).md": [
-      "prettier --write",
-      "git add"
+      "prettier --write"
     ]
   },
   "eslintConfig": {
     "extends": [
-      "carbon"
+      "eslint-config-carbon/internal"
     ]
   },
   "stylelint": {
@@ -140,63 +139,5 @@
       "./config/stylelint-config-carbon"
     ]
   },
-  "jest": {
-    "collectCoverageFrom": [
-      "packages/**/src/**/*.js",
-      "!packages/{bundler,cli,components,sketch}/**",
-      "!packages/**/{examples,stories}/**",
-      "!**/*-story.js"
-    ],
-    "moduleFileExtensions": [
-      "js",
-      "json",
-      "node"
-    ],
-    "reporters": [
-      "default",
-      "jest-junit"
-    ],
-    "setupFiles": [
-      "./tasks/jest/setup.js"
-    ],
-    "setupFilesAfterEnv": [
-      "./tasks/jest/setupAfterEnv.js"
-    ],
-    "snapshotSerializers": [
-      "enzyme-to-json/serializer"
-    ],
-    "testMatch": [
-      "<rootDir>/**/__tests__/**/*.js?(x)",
-      "<rootDir>/**/*.(spec|test).js?(x)",
-      "<rootDir>/**/*-(spec|test).js?(x)"
-    ],
-    "transform": {
-      "^.+\\.(js|jsx)$": "./tasks/jest/jsTransform.js",
-      "^.+\\.css$": "./tasks/jest/cssTransform.js",
-      "^(?!.*\\.(js|jsx|css|json)$)": "./tasks/jest/fileTransform.js"
-    },
-    "testRunner": "jest-circus/runner",
-    "testPathIgnorePatterns": [
-      "/cjs/",
-      "/dist/",
-      "/es/",
-      "/lib/",
-      "/build/",
-      "e2e",
-      "examples",
-      "/umd/"
-    ],
-    "transformIgnorePatterns": [
-      "[/\\\\]node_modules[/\\\\].+\\.(js|jsx)$"
-    ],
-    "watchPathIgnorePatterns": [
-      "/cjs/",
-      "/dist/",
-      "/es/",
-      "/examples/",
-      "/lib/",
-      "/storybook/",
-      "/results/"
-    ]
-  }
+  "packageManager": "yarn@3.4.1"
 }

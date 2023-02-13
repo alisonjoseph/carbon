@@ -22,7 +22,7 @@ describe('wrapFocus', () => {
         id="start-sentinel"
         tabIndex="0"
         role="link"
-        class="bx--visually-hidden">
+        class="cds--visually-hidden">
       </span>
       <div id="inner-modal" tabindex="-1">
         <button id="button-0">Button 0</button>
@@ -33,15 +33,34 @@ describe('wrapFocus', () => {
         id="end-sentinel"
         tabIndex="0"
         role="link"
-        class="bx--visually-hidden">
+        class="cds--visually-hidden">
       </span>
       <button id="outer-following"></button>
-      <div class="bx--tooltip" tabindex="0"></div>
+      <div class="cds--tooltip" tabindex="0"></div>
     `;
     document.body.appendChild(node);
     spyInnerModal = jest.spyOn(node.querySelector('#inner-modal'), 'focus');
     spyButton0 = jest.spyOn(node.querySelector('#button-0'), 'focus');
     spyButton2 = jest.spyOn(node.querySelector('#button-2'), 'focus');
+  });
+
+  afterEach(() => {
+    if (spyButton2) {
+      spyButton2.mockRestore();
+      spyButton2 = null;
+    }
+    if (spyButton0) {
+      spyButton0.mockRestore();
+      spyButton0 = null;
+    }
+    if (spyInnerModal) {
+      spyInnerModal.mockRestore();
+      spyInnerModal = null;
+    }
+    if (node) {
+      node.parentNode.removeChild(node);
+      node = null;
+    }
   });
 
   it('runs forward focus-wrap when following outer node is focused on', () => {
@@ -93,7 +112,7 @@ describe('wrapFocus', () => {
       bodyNode: node.querySelector('#inner-modal'),
       startSentinelNode: node.querySelector('#start-sentinel'),
       endSentinelNode: node.querySelector('#end-sentinel'),
-      currentActiveNode: node.querySelector('.bx--tooltip'),
+      currentActiveNode: node.querySelector('.cds--tooltip'),
       oldActiveNode: node.querySelector('#button-2'),
     });
     expect(spyInnerModal).not.toHaveBeenCalled();
@@ -127,24 +146,5 @@ describe('wrapFocus', () => {
       oldActiveNode: node.querySelector('#dummy-old-active-node'),
     });
     expect(spyInnerModal).toHaveBeenCalled();
-  });
-
-  afterEach(() => {
-    if (spyButton2) {
-      spyButton2.mockRestore();
-      spyButton2 = null;
-    }
-    if (spyButton0) {
-      spyButton0.mockRestore();
-      spyButton0 = null;
-    }
-    if (spyInnerModal) {
-      spyInnerModal.mockRestore();
-      spyInnerModal = null;
-    }
-    if (node) {
-      node.parentNode.removeChild(node);
-      node = null;
-    }
   });
 });

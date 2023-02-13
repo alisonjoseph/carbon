@@ -10,9 +10,10 @@ import path from 'path';
 import * as DataTable from '../../DataTable';
 
 const COMPONENT_PATH = path.resolve(__dirname, '../');
-const blacklist = new Set([
+const blocklist = new Set([
   'README.md',
   'migrate-to-7.x.md',
+  'docs',
   'state',
   'tools',
   '.DS_Store',
@@ -21,12 +22,15 @@ const blacklist = new Set([
   '__tests__',
   '__mocks__',
   'DataTable.js',
+  'DataTable.mdx',
   'stories',
+  'next',
+  'TableContext.js',
 ]);
 const components = fs
   .readdirSync(COMPONENT_PATH)
-  .filter((name) => !blacklist.has(name))
-  .map((name) => path.basename(name, '.js'));
+  .filter((name) => !blocklist.has(name))
+  .map((name) => path.basename(name, path.extname(name)));
 
 describe('DataTable exports', () => {
   it('should export DataTable by default', () => {
