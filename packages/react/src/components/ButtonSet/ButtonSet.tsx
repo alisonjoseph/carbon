@@ -14,7 +14,7 @@ import { ButtonKind } from '../Button/Button';
 
 export interface ButtonSetProps extends React.HTMLAttributes<HTMLDivElement> {
   /**
-   * fluid: button set resize to the size of the container up to a maximum dependant on the
+   * **Experimental**: fluid: button set resize to the size of the container up to a maximum dependant on the
    * number of buttons. Overrides `stacked` property.
    */
   fluid?: boolean;
@@ -135,7 +135,7 @@ ButtonSet.propTypes = {
   className: PropTypes.string,
 
   /**
-   * fluid: button set resize to the size of the container up to a maximum dependant on the
+   * **Experimental**: fluid: button set resize to the size of the container up to a maximum dependant on the
    * number of buttons.
    */
   fluid: PropTypes.bool,
